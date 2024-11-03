@@ -1,0 +1,1 @@
+;Acá irá toda la logica del juego en si, mover piezas

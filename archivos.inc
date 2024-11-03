@@ -1,0 +1,1 @@
+;Todo lo relacionando a guardar las variables de la partida, cargar partida etc

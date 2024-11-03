@@ -200,3 +200,4 @@ pintar_casilla_rojo:
     call printf
     add rsp, 8
     ret
+
