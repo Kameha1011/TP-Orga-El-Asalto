@@ -24,5 +24,7 @@ section .bss
 %include "display.inc"
 section .text
 main:
+    sub rsp, 8
     call imprimir_tablero
+    add rsp,8
     ret
