@@ -5,7 +5,7 @@ extern printf
 extern scanf
 
 section .data
-    txt_menu_juego db "Menu de juego",10,0
+    txt_menu_juego db "Menú de juego",10,0
 
     txt_turno_soldado db "1-Elige un soldado  |   2-Salir del juego",10,0
     txt_mover_soldado db "1-Mover soldado (recibe casilla)     |   2-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas.
@@ -14,11 +14,11 @@ section .data
     txt_salir_juego db "Saliendo ...",10,0
 
     txt_error_ingreso db "Error en ingreso",10,0
-    txt_casilla_invalida_oficial db "Casilla invalida, no se encuentra ningun oficial",10,0
-	txt_casilla_invalida_soldado db "Casilla invalida, no se encuentra ningun soldado",10,0
+    txt_casilla_invalida_oficial db "Casilla inválida, no se encuentra ningun oficial",10,0
+	txt_casilla_invalida_soldado db "Casilla inválida, no se encuentra ningun soldado",10,0
 
     txt_casilla db "Ingrese la casilla (XX): ",0
-    txt_opcion db "Ingrese la opcion: ",0
+    txt_opcion db "Ingrese la opción: ",0
 
     ;saltar turno (preguntar a los profes) || opcion de rendirse en caso borde 1
 	formato_num db "%d",0
