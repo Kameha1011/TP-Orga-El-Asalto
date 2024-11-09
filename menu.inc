@@ -21,11 +21,12 @@ section .data
     txt_opcion db "Ingrese la opción: ",0
 
     ;saltar turno (preguntar a los profes) || opcion de rendirse en caso borde 1
-	formato_num db "%d",0
+	formato_ingreso db "%s",0
 
 section .bss
     opcion resb 1
 	valido resb 1 ; 0 para invalido y 1 para valido
+    buffer resb 1
 section .text
     menu:
         ;menu principal
@@ -94,9 +95,9 @@ section .text
         call leer_opcion
 		add rsp,8
 
-        cmp byte[opcion],1
+        cmp byte[opcion],"1"
        	je leer_casilla
-        cmp byte[opcion],2
+        cmp byte[opcion],"2"
        	je salir_juego
 
 		sub rsp,8
@@ -115,9 +116,9 @@ section .text
         call leer_opcion
 		add rsp,8
 
-        cmp byte[opcion],1
+        cmp byte[opcion],"1"
        	je elegir_oficial
-       	cmp byte[opcion],2
+       	cmp byte[opcion],"2"
        	je salir_juego
 
         sub rsp,8
@@ -174,12 +175,19 @@ section .text
     	call printf
         add rsp,8
     ;Leer opcion
-    	mov rdi, formato_num
-    	lea rsi, [opcion]
+    	mov rdi, formato_ingreso
+    	lea rsi, [buffer]
         sub rsp,8
         call scanf
         add rsp,8
+        mov bh, [buffer]
+        mov [opcion], bh
+        cmp rax, 1
+        jl error_scan
     	ret
+    error_scan:
+        mov byte[opcion],"3"
+        ret
 ;----------------------------------------------------------------
     leer_casilla:
     ;Imprimir 'Ingrese la casilla: '
@@ -188,11 +196,18 @@ section .text
     	call printf
         add rsp,8
     ;Leer casilla
-        mov rdi, formato_num
-        lea rsi, [casilla]
+       mov rdi, formato_ingreso
+    	lea rsi, [buffer]
         sub rsp,8
         call scanf
         add rsp,8
+        mov bh, [buffer]
+        mov [casilla], bh
+        cmp rax, 1
+        jl error_scan_casilla
+    	ret
+    error_scan_casilla:
+        mov word[casilla],"11"
         ret
 
 ;----------------------------------------------------------------
@@ -231,3 +246,17 @@ section .text
 		call printf
 		add rsp,8
 		jmp txt_elegir_soldado
+
+;----------------------------------------------------------------
+
+    ; Subroutine to clear the input buffer
+    clear_input_buffer:
+        mov rax, 0              ; Syscall for read
+        mov rdi, 0              ; File descriptor for standard input (stdin)
+        lea rsi, [buffer]       ; Buffer to store discarded input
+        mov rdx, 1              ; Read one byte at a time
+    clear_loop:
+        syscall                 ; Read one byte
+        cmp byte [buffer], 10   ; Check if it's a newline character (ASCII 10)
+        jne clear_loop          ; Repeat until newline is found
+        ret                     ; Return to caller
