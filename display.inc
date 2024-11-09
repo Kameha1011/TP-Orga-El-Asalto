@@ -1,5 +1,5 @@
 ; Todo lo relacionado a mostrar datos por pantalla
-extern matriz
+;extern matriz
 section .data
     soldado db " X │",0
     oficial db " O │",0

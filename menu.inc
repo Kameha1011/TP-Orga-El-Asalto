@@ -1,3 +1,4 @@
+%include "juego.inc"
 global menu
 
 extern printf
@@ -13,6 +14,8 @@ section .data
     txt_salir_juego db "Saliendo ...",10,0
 
     txt_error_ingreso db "Error en ingreso",10,0
+    txt_casilla_invalida_oficial db "Casilla invalida, no se encuentra ningun oficial",10,0
+	txt_casilla_invalida_soldado db "Casilla invalida, no se encuentra ningun soldado",10,0
 
     txt_casilla db "Ingrese la casilla (XX): ",0
     txt_opcion db "Ingrese la opcion: ",0
@@ -22,7 +25,7 @@ section .data
 
 section .bss
     opcion resb 1
-
+	valido resb 1 ; 0 para invalido y 1 para valido
 section .text
     menu:
         ;menu principal
@@ -67,6 +70,13 @@ section .text
         sub rsp,8
     	call leer_casilla
     	add rsp,8
+		sub rsp,8
+		call verificar_casilla_soldado
+		add rsp,8
+
+		cmp byte[valido],0
+		je casilla_invalida_soldado
+		;si es valido
 		mov ax, [casilla]
 		mov [posicion_soldado], ax
     	jmp mover_soldado
@@ -89,7 +99,10 @@ section .text
         cmp byte[opcion],2
        	je salir_juego
 
-        ret
+		sub rsp,8
+		call error_ingreso
+		add rsp,8
+		jmp txt_elegir_oficial
 ;----------------------------------------------------------------
 
     txt_elegir_oficial: ;"1-Elige un oficial  |   2-Salir del juego"
@@ -118,6 +131,13 @@ section .text
         sub rsp,8
     	call leer_casilla
     	add rsp,8
+    	sub rsp,8
+    	call verificar_casilla_oficial
+        add rsp,8
+
+    	cmp byte[valido],0
+    	je casilla_invalida_oficial
+        ;si es valido
         mov ax, [casilla]
         mov [posicion_oficial],ax
     	jmp mover_oficial
@@ -193,3 +213,21 @@ section .text
         call printf
         add rsp,8
 		ret
+;----------------------------------------------------------------
+
+	casilla_invalida_oficial:
+		;Imprimir 'Casilla invalida'
+		mov rdi, txt_casilla_invalida_oficial
+		sub rsp,8
+		call printf
+		add rsp,8
+		jmp txt_elegir_oficial
+
+;----------------------------------------------------------------
+    casilla_invalida_soldado:
+		;Imprimir 'Casilla invalida'
+		mov rdi, txt_casilla_invalida_soldado
+		sub rsp,8
+		call printf
+		add rsp,8
+		jmp txt_elegir_soldado
