@@ -1,8 +1,6 @@
 %include "juego.inc"
 global menu
 
-extern printf
-extern scanf
 
 section .data
     txt_menu_juego db "Menú de juego",10,0
@@ -57,9 +55,9 @@ section .text
         call leer_opcion
 		add rsp,8
 
-        cmp byte[opcion],1
+        cmp byte[opcion],'1'
        	je elegir_soldado
-       	cmp byte[opcion],2
+       	cmp byte[opcion],'2'
        	je salir_juego
 
     	sub rsp,8
@@ -182,6 +180,7 @@ section .text
         add rsp,8
         mov bh, [buffer]
         mov [opcion], bh
+
         cmp rax, 1
         jl error_scan
     	ret
@@ -196,13 +195,15 @@ section .text
     	call printf
         add rsp,8
     ;Leer casilla
-       mov rdi, formato_ingreso
+        mov rdi, formato_ingreso
     	lea rsi, [buffer]
         sub rsp,8
         call scanf
         add rsp,8
-        mov bh, [buffer]
-        mov [casilla], bh
+
+        mov bx, [buffer]
+        mov [casilla], bx
+
         cmp rax, 1
         jl error_scan_casilla
     	ret

@@ -2,10 +2,12 @@
 
 global juego
 section .data
-
+    formato_numero db "%d", 0
+    formato_prueba db "casilla: %s ,fila: %hi ,columna: %hi",10,0
 section .bss
-    fila resb 1
-    columna resb 1
+    buffer_casilla resw 1
+    fila resw 1
+    columna resw 1
 section .text
 juego:
 
@@ -23,15 +25,16 @@ verificar_casilla_soldado:
     cmp byte[valido], 0
     je salida
 
-    mov rdi,[fila - 1]   ;inicializo i filas
-    mov rbx,[columna - 1]   ;inicializo j columnas
+    movzx rax, word[fila]   ; inicializo i filas
+    movzx rcx, word[columna]   ;inicializo j columnas
 
-    imul rdi,7      ;i filas * cant columnas
-    add  rdi,rsi     ;(i filas * cant columnas) + j columnas
-    imul rdi,2       ;((i filas * cant columnas) + j columnas) * long elemento
+    imul rax,7      ;i filas * cant columnas
+    add  rax,rcx     ;(i filas * cant columnas) + j columnas
+    imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
-    mov ax, [soldado]
-    cmp [matriz + rdi],ax
+    movzx rbx, byte[soldado]
+    movzx rcx, byte[matriz + rax]
+    cmp rcx,rbx
     jne error_casilla ;si la casilla no es un soldado -> invalido
 
     ret ;si llega a este punto la casilla es válida
@@ -49,53 +52,62 @@ verificar_casilla_oficial:
     cmp byte[valido], 0
     je salida
 
-    mov rdi,[fila - 1]   ;inicializo i filas
-    mov rbx,[columna - 1]   ;inicializo j columnas
+    movzx rax, word[fila]   ; inicializo i filas
+    movzx rcx, word[columna]   ;inicializo j columnas
 
-    imul rdi,7      ;i filas * cant columnas
-    add  rdi,rsi     ;(i filas * cant columnas) + j columnas
-    imul rdi,2       ;((i filas * cant columnas) + j columnas) * long elemento
+    imul rax,7      ;i filas * cant columnas
+    add  rax,rcx     ;(i filas * cant columnas) + j columnas
+    imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
-    mov ax, [oficial]
-    cmp [matriz + rdi],ax
+    movzx rbx, byte[oficial]
+    movzx rcx, byte[matriz + rax]
+    cmp rcx,rbx
     jne error_casilla ;si la casilla no es un oficial -> invalido
 
     ret ;si llega a este punto la casilla es válida
 
 ;------------------------------------------------------------------
 verificar_casilla_matriz: ;si la casilla pertenece a la matriz
-    cmp byte[fila], 0
+    cmp word[fila], 0
     jl error_casilla
-    cmp byte[fila], 7
+    cmp word[fila], 6
     jg error_casilla
-    cmp byte[fila], 3 ;si la fila esta entre 3 y 5 entonces verifica que junto a las columnas es una posicion valida
+    cmp word[fila], 2 ;si la fila esta entre 3 y 5 entonces verifica que junto a las columnas es una posicion valida
     jl casilla_col_invalida
-    cmp byte[fila], 5
+    cmp word[fila], 4
     jg casilla_col_invalida
-    cmp byte[columna], 0
+    cmp word[columna], 0
     jl error_casilla
-    cmp byte[columna], 7
+    cmp word[columna], 6
     jg error_casilla
 
     ret
 casilla_col_invalida:
-    cmp byte[columna], 3
+    cmp word[columna], 2
     jl error_casilla
-    cmp byte[columna], 5
+    cmp word[columna], 4
     jg error_casilla
 
     ret
 ;------------------------------------------------------------------
 obtener_fila_columna:
-    ; Obtener fila y columna
-    mov ax, word [casilla]    ; Cargar el número completo (ej. 23) en AX
+
+    ; Obtener casilla a formato entero
+    mov rdi, casilla
+    mov rsi, formato_numero
+    mov rdx, buffer_casilla
+    sub rsp, 8
+    call sscanf
+    add rsp, 8
+
+    mov ax, word[buffer_casilla]    ; Cargar el número completo (ej. 23) en AX
     mov bx, 10                ; Divisor (base 10)
     div bx                    ; Divide AX entre BX: AL = AX / BX (cociente), AH = AX % BX (residuo)
-    ;calcular posicion en matriz
 
     ; Guardar fila y columna
-    mov [fila], al            ; Fila (cociente) en AL
-    mov [columna], ah         ; Columna (residuo) en AH
+    mov [fila], ax            ; Fila (cociente) en AX
+    mov [columna], dx         ; Columna (residuo) en DX
+
     ret
 ;------------------------------------------------------------------
 error_casilla:
