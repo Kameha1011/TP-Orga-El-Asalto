@@ -1,4 +1,4 @@
-%include "juego.inc"
+%include "verificaciones.inc"
 global menu
 
 
