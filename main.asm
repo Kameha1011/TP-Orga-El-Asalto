@@ -1,15 +1,16 @@
 global main
 %include "menu.inc"
-;%include "display.inc"
+%include "display.inc"
 
 extern printf
 extern scanf
 extern sscanf
 
 section .data
-    turno db 0  ;0 si es turno del jugador 1, 1 si es turno del jugador 2
+    turno db 1  ;0 si es turno del jugador 1(soldado), 1 si es turno del jugador 2(oficial)
     posicion_soldado dw " ";posicion del soldado elegido para el turno
     posicion_oficial dw " " ;posicion del oficial elegido para el turno
+    casilla_destino dw "" ;casilla a la cual se quiere mover el jugador
     formato_casilla db "Elegiste el oficial de la %hi, y quieres moverlo a la casilla %hi",10, 0
 
     global matriz ;0 casilla invalida - 88 casilla soldado - 79 casilla oficial - 1 casilla vacia
@@ -24,20 +25,23 @@ section .data
     columnas dd 7
     longitudFila dd 7
     longitudElemento dd 1
-    oficial db 79
-    soldado db 88
+    num_oficial db 79
+    num_soldado db 88
+    vacio db 1
 section .bss
     casilla resb 2 ;casilla a la que se quiere mover el jugador
 
 section .text
 main:
-;    sub rsp, 8
-;    call imprimir_tablero
-;    add rsp,8
+    sub rsp, 8
+    call imprimir_tablero
+    add rsp,8
 
     sub rsp, 8
     call menu_juego
     add rsp,8
+
+    jmp main
 
 
     ret

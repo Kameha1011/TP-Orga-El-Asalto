@@ -4,6 +4,7 @@ global juego
 section .data
     formato_numero db "%d", 0
     formato_prueba db "casilla: %s ,fila: %hi ,columna: %hi",10,0
+    txt_casilla_vacia db "La casilla ingresada no está vacía",10,0
 section .bss
     buffer_casilla resw 1
     fila resw 1
@@ -16,6 +17,7 @@ juego:
 ;Verificar si la casilla ingresada contiene un soldado
 verificar_casilla_soldado:
     mov byte[valido], 1
+    mov rdi, casilla
     sub rsp, 8
     call obtener_fila_columna
     add rsp, 8
@@ -32,17 +34,18 @@ verificar_casilla_soldado:
     add  rax,rcx     ;(i filas * cant columnas) + j columnas
     imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
-    movzx rbx, byte[soldado]
+    movzx rbx, byte[num_soldado]
     movzx rcx, byte[matriz + rax]
     cmp rcx,rbx
     jne error_casilla ;si la casilla no es un soldado -> invalido
 
     ret ;si llega a este punto la casilla es válida
 
-
+;------------------------------------------------------------------
 ;Verificar si la casilla ingresada contiene un oficial
 verificar_casilla_oficial:
     mov byte[valido], 1
+    mov rdi, casilla
     sub rsp, 8
     call obtener_fila_columna
     add rsp, 8
@@ -59,7 +62,7 @@ verificar_casilla_oficial:
     add  rax,rcx     ;(i filas * cant columnas) + j columnas
     imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
-    movzx rbx, byte[oficial]
+    movzx rbx, byte[num_oficial]
     movzx rcx, byte[matriz + rax]
     cmp rcx,rbx
     jne error_casilla ;si la casilla no es un oficial -> invalido
@@ -90,10 +93,10 @@ casilla_col_invalida:
 
     ret
 ;------------------------------------------------------------------
+;ingresar la casilla en rdi
 obtener_fila_columna:
 
     ; Obtener casilla a formato entero
-    mov rdi, casilla
     mov rsi, formato_numero
     mov rdx, buffer_casilla
     sub rsp, 8
@@ -108,11 +111,49 @@ obtener_fila_columna:
     mov [fila], ax            ; Fila (cociente) en AX
     mov [columna], dx         ; Columna (residuo) en DX
 
+    mov word[buffer_casilla], 0   ; Limpiar buffer
+
     ret
+
+;------------------------------------------------------------------
+;ingresar la casilla en rdi
+verificar_casilla_vacia:
+    mov byte[valido], 1
+    sub rsp, 8
+    call obtener_fila_columna
+    add rsp, 8
+    sub rsp, 8
+    call verificar_casilla_matriz
+    add rsp, 8
+    cmp byte[valido], 0
+    je salida
+
+    movzx rax, word[fila]   ; inicializo i filas
+    movzx rcx, word[columna]   ;inicializo j columnas
+
+    imul rax,7      ;i filas * cant columnas
+    add  rax,rcx     ;(i filas * cant columnas) + j columnas
+    imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
+
+    movzx rbx, byte[vacio]
+    movzx rcx, byte[matriz + rax]
+    cmp rcx,rbx
+    jne error_casilla_vacia ;si la casilla no esta vacia -> invalido
+
+    ret ;si llega a este punto la casilla es válida
+
 ;------------------------------------------------------------------
 error_casilla:
     mov byte[valido], 0
     ret
+
 ;------------------------------------------------------------------
-salida:
+error_casilla_vacia:
+    mov byte[valido], 0
+    mov rdi, txt_casilla_vacia
+    sub rsp, 8
+    call printf
+    add rsp, 8
     ret
+
+;------------------------------------------------------------------
