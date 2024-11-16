@@ -251,7 +251,7 @@ section .text
         sub rsp,8
         call printf
         add rsp,8
-
+        mov rax,[sys_call]
         ret
 ;----------------------------------------------------------------
 

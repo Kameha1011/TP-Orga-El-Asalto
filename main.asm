@@ -26,6 +26,8 @@ section .data
     num_oficial db 79
     num_soldado db 88
     vacio db 1
+    sys_call dq 60
+    exit_code dq 0
 section .bss
     casilla resb 2 ;casilla a la que se quiere mover el jugador
 
@@ -39,7 +41,13 @@ main:
     call menu_juego
     add rsp,8
 
+    cmp rax,[sys_call]
+    je fin
     jmp main
 
 
     ret
+fin:
+    mov rax,[sys_call]
+    mov rdi,[exit_code]
+    syscall
