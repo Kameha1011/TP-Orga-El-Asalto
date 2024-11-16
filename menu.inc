@@ -76,8 +76,10 @@ section .text
 		cmp byte[valido],0
 		je casilla_invalida_soldado
 		;si es valido
-		mov ax, [casilla]
-		mov [posicion_soldado], ax
+    	mov ax, [fila]
+        mov [fila_partida],ax
+        mov ax, [columna]
+        mov [columna_partida],ax
 	pedir_casilla_destino_soldado:
         sub rsp,8
     	call mover_soldado
@@ -153,8 +155,10 @@ section .text
     	cmp byte[valido],0
     	je casilla_invalida_oficial
         ;si es valido
-        mov ax, [casilla]
-        mov [posicion_oficial],ax
+    	mov ax, [fila]
+        mov [fila_partida],ax
+        mov ax, [columna]
+        mov [columna_partida],ax
 	pedir_casilla_destino_oficial:
 		sub rsp,8
 		call mover_oficial

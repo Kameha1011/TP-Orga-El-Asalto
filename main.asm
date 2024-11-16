@@ -8,9 +8,7 @@ extern sscanf
 
 section .data
     turno db 1  ;0 si es turno del jugador 1(soldado), 1 si es turno del jugador 2(oficial)
-    posicion_soldado dw " ";posicion del soldado elegido para el turno
-    posicion_oficial dw " " ;posicion del oficial elegido para el turno
-    casilla_destino dw "" ;casilla a la cual se quiere mover el jugador
+    casilla_destino dw "",0 ;casilla a la cual se quiere mover el jugador
     formato_casilla db "Elegiste el oficial de la %hi, y quieres moverlo a la casilla %hi",10, 0
 
     global matriz ;0 casilla invalida - 88 casilla soldado - 79 casilla oficial - 1 casilla vacia

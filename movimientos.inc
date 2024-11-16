@@ -14,16 +14,6 @@ section .text
 
     ;------------------------------------------------------------------
     movimiento_soldado:
-        mov rdi, posicion_soldado
-        sub rsp, 8
-        call obtener_fila_columna
-        add rsp, 8
-
-        mov dx, [fila]
-        mov [fila_partida], dx
-        mov dx, [columna]
-        mov [columna_partida], dx
-
         movzx rax, word[fila_partida]   ; inicializo i filas
         movzx rcx, word[columna_partida]   ;inicializo j columnas
 
@@ -58,15 +48,6 @@ section .text
         ret
     ;------------------------------------------------------------------
     movimiento_oficial:
-        mov rdi, posicion_oficial
-        sub rsp, 8
-        call obtener_fila_columna
-        add rsp, 8
-
-        mov dx, [fila]
-        mov [fila_partida], dx
-        mov dx, [columna]
-        mov [columna_partida], dx
 
         movzx rax, word[fila_partida]   ; inicializo i filas
         movzx rcx, word[columna_partida]   ;inicializo j columnas
