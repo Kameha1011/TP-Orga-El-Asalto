@@ -8,6 +8,9 @@ section .bss
     columna_partida resw 1
     fila_destino resw 1
     columna_destino resw 1
+    buffer_casillas_ady resw 8
+    buffer_casilla_ady resw 1
+
 section .text
     movimientos:
         ret
@@ -81,3 +84,61 @@ section .text
         ;cambio de turno
         mov byte[turno], 0
         ret
+    ;------------------------------------------------------------------
+
+    obtener_adyacencias:
+        cmp word[fila_partida],1
+        jl ady_medio_izq
+        ady_sup:
+            mov al,byte[fila_partida]
+            dec al
+            mov ah,byte[columna_partida]
+            mov [buffer_casillas_ady],ax   
+        cmp word[columna_partida],1
+        jl ady_sup_der
+        ady_sup_izq:
+            mov al,byte[fila_partida]
+            dec al
+            mov ah,byte[columna_partida]
+            dec ah
+            mov [buffer_casillas_ady+2],ax
+        cmp word[columna_partida],5
+        jg ady_medio_izq
+        ady_sup_der:
+            mov al,byte[fila_partida]
+            dec al
+            mov ah,byte[columna_partida]
+            inc ah
+            mov [buffer_casillas_ady+4],ax
+        ady_medio_izq:
+            mov al,byte[fila_partida]
+            mov ah,byte[columna_partida]
+            dec ah
+            mov [buffer_casillas_ady+6],ax
+        ady_medio_der:
+            mov al,byte[fila_partida]
+            mov ah,byte[columna_partida]
+            inc ah
+            mov [buffer_casillas_ady+8],ax
+        cmp word[fila_partida],5
+        jg devolver_ady
+        ady_inf:
+            mov al,byte[fila_partida]
+            inc al
+            mov ah,byte[columna_partida]
+            mov [buffer_casillas_ady+10],ax
+        ady_inf_izq:
+            mov al,byte[fila_partida]
+            inc al
+            mov ah,byte[columna_partida]
+            dec ah
+            mov [buffer_casillas_ady+12],ax
+        ady_inf_der:
+            mov al,byte[fila_partida]
+            inc al
+            mov ah,byte[columna_partida]
+            inc ah
+            mov [buffer_casillas_ady+14],ax
+        devolver_ady:
+            ret
+    ;------------------------------------------------------------------
