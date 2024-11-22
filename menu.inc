@@ -2,8 +2,9 @@
 %include "movimientos.inc"
 global menu_principal
 
-
+extern system
 section .data
+    cmd_clear db "clear",0
 
     txt_menu_principal db "Menú principal",10,0
     txt_menu_principal_opciones db "1-Continuar partida   |   2-Nueva partida   |   3-Salir del juego",10,0
@@ -43,6 +44,9 @@ section .bss
     buffer resb 1
 section .text
     menu_principal:
+    	sub rsp, 8
+    	call limpiar_pantalla
+        add rsp, 8
     ;Imprimir 'Menu principal'
         mov rdi,txt_menu_principal
         sub rsp,8
@@ -71,6 +75,10 @@ section .text
 
 ;---------------------------------------------------------------------
     menu_continuar_partida:
+    	sub rsp, 8
+    	call limpiar_pantalla
+        add rsp, 8
+
         ;Imprimir 'Continuar partida' (no implementado) -> a revisar guardado de partidas, etc
         mov rdi,txt_continuar_partida
         sub rsp,8
@@ -81,6 +89,10 @@ section .text
 
 ;----------------------------------------------------------------------
     menu_nueva_partida:
+    	sub rsp, 8
+    	call limpiar_pantalla
+        add rsp, 8
+
         ;Imprimir 'Nueva partida'
         mov rdi,txt_menu_nueva_partida
         sub rsp,8
@@ -99,7 +111,7 @@ section .text
         cmp byte[opcion],'1'
         je menu_personalizar_partida
         cmp byte[opcion],'2'
-        je empezar_juego
+        je juego
         cmp byte[opcion],'3'
         je menu_principal
         cmp byte[opcion],'4'
@@ -111,6 +123,10 @@ section .text
         jmp menu_nueva_partida
 ;----------------------------------------------------------------------
     menu_personalizar_partida:
+        sub rsp, 8
+    	call limpiar_pantalla
+        add rsp, 8
+
         ;Imprimir 'Personalizar partida'
         mov rdi,txt_menu_personalizar_partida
         sub rsp,8
@@ -136,7 +152,7 @@ section .text
         cmp byte[opcion],'4'
         je quien_empieza
         cmp byte[opcion],'5'
-        je empezar_juego
+        je juego
         cmp byte[opcion],'6'
         je menu_nueva_partida
         cmp byte[opcion],'7'
@@ -183,6 +199,10 @@ section .text
 
 ;----------------------------------------------------------------------
     personalizar_orientacion_tablero:
+    	sub rsp, 8
+    	call limpiar_pantalla
+        add rsp, 8
+
         ;Imprimir 'Personalizar orientacion de tablero'
         mov rdi, txt_orientacion_tablero ;"Elija la orientacion del tablero (arriba por defecto): "
         sub rsp,8
@@ -243,6 +263,71 @@ section .text
     empiezan_oficiales:
         mov byte[turno],1
         jmp menu_personalizar_partida
+
+;----------------------------------------------------------------------
+    juego:
+        sub rsp, 8
+    	call limpiar_pantalla
+        add rsp, 8
+    	sub rsp, 8
+		call imprimir_tablero
+	    add rsp,8
+
+    	sub rsp, 8
+        call empezar_juego
+        add rsp, 8
+
+    	cmp rax,[sys_call]
+        je fin
+        cmp byte[soldados_en_fuerte],9
+        je fin_fuerte
+        cmp byte[cantidad_soldados],8
+        je fin_soldado
+        cmp byte[cantidad_oficiales],0
+        je fin_oficial
+        jmp juego
+
+        ret
+    fin:
+        mov rax,[sys_call]
+        mov rdi,[exit_code]
+        syscall
+    fin_oficial:
+        sub rsp, 8
+        call imprimir_tablero
+        add rsp,8
+        mov rdi, oficiales_insuficientes
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rax,[sys_call]
+        mov rdi,[exit_code]
+        syscall
+    fin_soldado:
+        sub rsp, 8
+        call imprimir_tablero
+        add rsp,8
+        mov rdi, soldados_insuficientes
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rax,[sys_call]
+        mov rdi,[exit_code]
+        syscall
+    fin_fuerte:
+        sub rsp, 8
+        call imprimir_tablero
+        add rsp,8
+        mov rdi, fuerte_tomado
+        sub rsp, 8
+        call printf
+    	add rsp, 8
+
+    	mov rax,[sys_call]
+    	mov rdi,[exit_code]
+    	syscall
 
 ;----------------------------------------------------------------------
     empezar_juego:
