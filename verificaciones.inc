@@ -4,6 +4,7 @@ section .data
     formato_numero db "%d", 0
     formato_prueba db "casilla: %s ,fila: %hi ,columna: %hi",10,0
     txt_casilla_vacia db "La casilla ingresada no está vacía",10,0
+    txt_casilla_no_ady db "La casilla ingresada no es adyacente (no puedes moverte mas de 1 casilla)",10,0
 section .bss
     buffer_casilla resw 1
     fila resw 1
@@ -178,5 +179,11 @@ continuar_iteracion_adyacentes:
     inc rcx
     cmp rcx,8
     jl recorrer_adyacencias_filas
+error_casilla_no_ady:
+    mov rdi, txt_casilla_no_ady
+    sub rsp, 8
+    call printf
+    add rsp, 8
 terminar_verificacion_ady:
     ret
+
