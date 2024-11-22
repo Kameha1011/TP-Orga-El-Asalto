@@ -1,18 +1,15 @@
 ;Acá irá toda la logica del juego en si, mover piezas
-
 global juego
 section .data
     formato_numero db "%d", 0
     formato_prueba db "casilla: %s ,fila: %hi ,columna: %hi",10,0
     txt_casilla_vacia db "La casilla ingresada no está vacía",10,0
+    txt_casilla_no_ady db "La casilla ingresada no es adyacente (no puedes moverte mas de 1 casilla)",10,0
 section .bss
     buffer_casilla resw 1
     fila resw 1
     columna resw 1
 section .text
-juego:
-
-    ret
 ;------------------------------------------------------------------
 ;Verificar si la casilla ingresada contiene un soldado
 verificar_casilla_soldado:
@@ -120,9 +117,6 @@ obtener_fila_columna:
 verificar_casilla_vacia:
     mov byte[valido], 1
     sub rsp, 8
-    call obtener_fila_columna
-    add rsp, 8
-    sub rsp, 8
     call verificar_casilla_matriz
     add rsp, 8
     cmp byte[valido], 0
@@ -143,6 +137,37 @@ verificar_casilla_vacia:
     ret ;si llega a este punto la casilla es válida
 
 ;------------------------------------------------------------------
+verificar_casilla_eliminar_soldado:
+    mov byte[valido], 1
+
+    movzx rax, word[fila_destino]
+    add rax, [fila_partida]
+    xor rdx,rdx  ;limpio rdx para evitar contenido basura
+    mov rbx, 2                ; Divisor
+    div rbx
+    mov [fila_partida], ax
+    movzx rax, word[fila_partida]   ; inicializo i filas
+
+    mov ax, word[columna_destino]
+    add [columna_partida], ax
+    mov ax, word[columna_partida]
+    mov bx, 2
+    div bx
+    mov [columna_partida], ax
+    movzx rcx, word[columna_partida]   ;inicializo j columnas
+
+    imul rax,7      ;i filas * cant columnas
+    add  rax,rcx     ;(i filas * cant columnas) + j columnas
+    imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
+
+    movzx rbx, byte[num_soldado]
+    movzx rcx, byte[matriz + rax]
+    cmp rcx,rbx
+    jne error_casilla ;si la casilla no es un soldado -> invalido
+
+    ret ;si llega a este punto la casilla es válida
+
+;------------------------------------------------------------------
 error_casilla:
     mov byte[valido], 0
     ret
@@ -157,3 +182,36 @@ error_casilla_vacia:
     ret
 
 ;------------------------------------------------------------------
+verificar_casilla_destino_adyacente:
+    mov byte[valido],0
+    sub rsp,8
+    call obtener_adyacencias
+    add rsp,8
+    ;Recorrer matriz adyacencias para comparar cada elem con la casilla destino y ver si pertenece
+    mov rcx,0 ; i
+    mov rax,0; reiniciar rax
+recorrer_adyacencias_filas:
+    mov rdx,0
+    imul rdx,rcx,2 ; i*tamanoElem
+    mov ax,[buffer_casillas_ady + edx]; al = fila, ah = columna
+comparar_fila:
+    cmp al,[fila]
+    je comparar_columna
+    jmp continuar_iteracion_adyacentes
+comparar_columna:
+    cmp ah,[columna]
+    jne continuar_iteracion_adyacentes
+    mov byte[valido],1
+    jmp terminar_verificacion_ady
+continuar_iteracion_adyacentes:
+    inc rcx
+    cmp rcx,8
+    jl recorrer_adyacencias_filas
+error_casilla_no_ady:
+    mov rdi, txt_casilla_no_ady
+    sub rsp, 8
+    call printf
+    add rsp, 8
+terminar_verificacion_ady:
+    ret
+
