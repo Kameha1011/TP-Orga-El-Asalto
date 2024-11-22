@@ -1,5 +1,5 @@
-%include "verificaciones.inc"
 %include "movimientos.inc"
+%include "verificaciones.inc"
 global menu
 
 
@@ -86,6 +86,14 @@ section .text
     	add rsp,8
 
         mov rdi, casilla_destino
+        sub rsp, 8
+        call obtener_fila_columna
+        add rsp, 8
+        sub rsp,8
+        call verificar_casilla_destino_adyacente
+        add rsp,8
+    	cmp byte[valido],0
+    	je pedir_casilla_destino_soldado
        	sub rsp,8
     	call verificar_casilla_vacia
     	add rsp,8
@@ -163,8 +171,16 @@ section .text
 		sub rsp,8
 		call mover_oficial
 		add rsp,8
-
         mov rdi, casilla_destino
+        sub rsp, 8
+        call obtener_fila_columna
+        add rsp, 8
+        sub rsp,8
+        call verificar_casilla_destino_adyacente
+        add rsp,8
+    	cmp byte[valido],0
+    	je pedir_casilla_destino_oficial
+        
 		sub rsp,8
 		call verificar_casilla_vacia
 		add rsp,8
