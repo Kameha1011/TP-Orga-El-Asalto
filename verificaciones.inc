@@ -10,9 +10,6 @@ section .bss
     fila resw 1
     columna resw 1
 section .text
-juego:
-
-    ret
 ;------------------------------------------------------------------
 ;Verificar si la casilla ingresada contiene un soldado
 verificar_casilla_soldado:
@@ -139,6 +136,37 @@ verificar_casilla_vacia:
     movzx rcx, byte[matriz + rax]
     cmp rcx,rbx
     jne error_casilla_vacia ;si la casilla no esta vacia -> invalido
+
+    ret ;si llega a este punto la casilla es válida
+
+;------------------------------------------------------------------
+verificar_casilla_eliminar_soldado:
+    mov byte[valido], 1
+
+    movzx rax, word[fila_destino]
+    add rax, [fila_partida]
+    xor rdx,rdx  ;limpio rdx para evitar contenido basura
+    mov rbx, 2                ; Divisor
+    div rbx
+    mov [fila_partida], ax
+    movzx rax, word[fila_partida]   ; inicializo i filas
+
+    mov ax, word[columna_destino]
+    add [columna_partida], ax
+    mov ax, word[columna_partida]
+    mov bx, 2
+    div bx
+    mov [columna_partida], ax
+    movzx rcx, word[columna_partida]   ;inicializo j columnas
+
+    imul rax,7      ;i filas * cant columnas
+    add  rax,rcx     ;(i filas * cant columnas) + j columnas
+    imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
+
+    movzx rbx, byte[num_soldado]
+    movzx rcx, byte[matriz + rax]
+    cmp rcx,rbx
+    jne error_casilla ;si la casilla no es un soldado -> invalido
 
     ret ;si llega a este punto la casilla es válida
 

@@ -1,9 +1,25 @@
 %include "verificaciones.inc"
 %include "movimientos.inc"
-global menu
+global menu_principal
 
 
 section .data
+
+    txt_menu_principal db "Menú principal",10,0
+    txt_menu_principal_opciones db "1-Continuar partida   |   2-Nueva partida   |   3-Salir del juego",10,0
+    txt_continuar_partida db "Continuar partida",10,0
+    txt_menu_nueva_partida db "Nueva partida",10,0
+    txt_menu_nueva_partida_opciones db "1-Personalizar partida   |   2-Empezar partida por defecto   |   3-Volver atras   |   4-Salir del juego",10,0
+    txt_menu_personalizar_partida db "Personalizar partida - Modificar",10,0
+    txt_menu_personalizar_partida_opciones db "1-Simbolo de soldados   |   2-Simbolo de oficiales   |   3-Orientacion de tablero(arriba por defecto)  ",10,"4-Quien empieza(soldados por defecto)   |   5-Comenzar   |   6-Volver atras   |   7-Salir del juego",10,0
+    txt_simbolo_soldados db "Ingrese el simbolo de los soldados: ",0
+    txt_simbolo_oficiales db "Ingrese el simbolo de los oficiales: ",0
+    txt_orientacion_tablero db "Elija la orientacion del tablero (arriba por defecto): ",0
+    txt_menu_orientacion_tablero db "1-Arriba   |   2-Abajo   |   3-Izquierda   |   4-Derecha   | 5-Volver",10,0
+    txt_quien_empieza db "1-Empiezan los soldados   |   2-Empiezan los oficiales   | 3-Volver",0
+
+
+
     txt_menu_juego db "Menú de juego",10,0
 
     txt_turno_soldado db "1-Elige un soldado   |   2-Salir del juego",10,0
@@ -26,19 +42,217 @@ section .bss
 	valido resb 1 ; 0 para invalido y 1 para valido
     buffer resb 1
 section .text
-    menu:
-        ;menu principal
-        ret
+    menu_principal:
+    ;Imprimir 'Menu principal'
+        mov rdi,txt_menu_principal
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        mov rdi, txt_menu_principal_opciones ;"1-Continuar partida   |   2-Nueva partida   |   3-Salir del juego"
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+        cmp byte[opcion],'1'
+        je menu_continuar_partida
+        cmp byte[opcion],'2'
+        je menu_nueva_partida
+        cmp byte[opcion],'3'
+        je salir_juego
+
+        sub rsp,8
+        call error_ingreso
+		add rsp,8
+        jmp menu_principal
+
+;---------------------------------------------------------------------
+    menu_continuar_partida:
+        ;Imprimir 'Continuar partida' (no implementado) -> a revisar guardado de partidas, etc
+        mov rdi,txt_continuar_partida
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        jmp menu_principal; esto solo porque no esta implementado
 
 ;----------------------------------------------------------------------
-    menu_juego:
+    menu_nueva_partida:
+        ;Imprimir 'Nueva partida'
+        mov rdi,txt_menu_nueva_partida
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        mov rdi, txt_menu_nueva_partida_opciones ;"1-Personalizar partida   |   2-Empezar partida por defecto   |   3-Volver atras   |   4-Salir del juego"
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+
+        cmp byte[opcion],'1'
+        je menu_personalizar_partida
+        cmp byte[opcion],'2'
+        je empezar_juego
+        cmp byte[opcion],'3'
+        je menu_principal
+        cmp byte[opcion],'4'
+        je salir_juego
+
+        sub rsp,8
+        call error_ingreso
+		add rsp,8
+        jmp menu_nueva_partida
+;----------------------------------------------------------------------
+    menu_personalizar_partida:
+        ;Imprimir 'Personalizar partida'
+        mov rdi,txt_menu_personalizar_partida
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        mov rdi, txt_menu_personalizar_partida_opciones ;"1-Simbolo de soldados   |   2-Simbolo de oficiales   |   3-Orientacion de tablero(arriba por defecto)  ",10
+                                                           ;"4-Quien empieza(soldados por defecto)   |   5-Comenzar   |   6-Volver atras   |   7-Salir del juego"
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+
+        cmp byte[opcion],'1'
+        je personalizar_simbolo_soldados
+        cmp byte[opcion],'2'
+        je personalizar_simbolo_oficiales
+        cmp byte[opcion],'3'
+        je personalizar_orientacion_tablero
+        cmp byte[opcion],'4'
+        je quien_empieza
+        cmp byte[opcion],'5'
+        je empezar_juego
+        cmp byte[opcion],'6'
+        je menu_nueva_partida
+        cmp byte[opcion],'7'
+        je salir_juego
+
+        sub rsp,8
+        call error_ingreso
+		add rsp,8
+        jmp menu_personalizar_partida
+
+;---------------------------------------------------------------------
+    personalizar_simbolo_soldados:
+        ;Imprimir 'Personalizar simbolo de soldados'
+        mov rdi,txt_menu_principal    ;"Ingrese el simbolo de los soldados: "
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+
+        mov ax, [opcion]
+        mov [num_soldado], ax
+
+        jmp menu_personalizar_partida
+
+;----------------------------------------------------------------------
+    personalizar_simbolo_oficiales:
+        ;Imprimir 'Personalizar simbolo de oficiales'
+        mov rdi, txt_simbolo_oficiales; "Ingrese el simbolo de los oficiales: "
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+
+        mov ax, [opcion]
+        mov [num_oficial], ax
+
+        jmp menu_personalizar_partida
+
+;----------------------------------------------------------------------
+    personalizar_orientacion_tablero:
+        ;Imprimir 'Personalizar orientacion de tablero'
+        mov rdi, txt_orientacion_tablero ;"Elija la orientacion del tablero (arriba por defecto): "
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        mov rdi, txt_menu_orientacion_tablero ;"1-Arriba   |   2-Abajo   |   3-Izquierda   |   4-Derecha   | 5-Volver"
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+
+        cmp byte[opcion],'1'
+        ;je orientacion_arriba
+        cmp byte[opcion],'2'
+        ;je orientacion_abajo
+        cmp byte[opcion],'3'
+        ;je orientacion_izquierda
+        cmp byte[opcion],'4'
+        ;je orientacion_derecha
+        cmp byte[opcion],'5'
+        je menu_personalizar_partida
+
+        sub rsp,8
+        call error_ingreso
+		add rsp,8
+        jmp personalizar_orientacion_tablero
+;----------------------------------------------------------------------
+    quien_empieza:
+        ;Imprimir 'Quien empieza'
+        mov rdi, txt_quien_empieza ;"1-Empiezan los soldados   |   2-Empiezan los oficiales   | 3-Volver"
+        sub rsp,8
+        call printf
+        add rsp,8
+
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+
+        cmp byte[opcion],'1'
+        je empiezan_soldados
+        cmp byte[opcion],'2'
+        je empiezan_oficiales
+        cmp byte[opcion],'3'
+        je menu_personalizar_partida
+
+        sub rsp,8
+        call error_ingreso
+		add rsp,8
+        jmp quien_empieza
+
+    empiezan_soldados:
+        mov byte[turno],0
+        jmp menu_personalizar_partida
+    empiezan_oficiales:
+        mov byte[turno],1
+        jmp menu_personalizar_partida
+
+;----------------------------------------------------------------------
+    empezar_juego:
         ;Imprimir 'Menu de juego'
         mov rdi,txt_menu_juego
         sub rsp,8
         call printf
         add rsp,8
 
-        ;Imprimir 'Elegir soldado' o 'Elegir oficial'
+        ;Imprimir 'Elegir soldado' o 'Elegir oficial' depende del turno
         cmp byte[turno],0
         je txt_elegir_soldado
         cmp byte[turno],1
@@ -75,15 +289,23 @@ section .text
 
 		cmp byte[valido],0
 		je casilla_invalida_soldado
+
 		;si es valido
+    	sub rsp,8
+    	call obtener_adyacencias
+        add rsp,8
     	mov ax, [fila]
         mov [fila_partida],ax
         mov ax, [columna]
         mov [columna_partida],ax
+
 	pedir_casilla_destino_soldado:
         sub rsp,8
     	call mover_soldado
     	add rsp,8
+
+    	cmp byte[opcion],"2"
+    	je salida
 
         mov rdi, casilla_destino
        	sub rsp,8
@@ -100,7 +322,7 @@ section .text
 ;-----------------------------------------------------------------
 
 
-	mover_soldado: ;"1-Mover soldado (recibe casilla)     |   2-Salir del juego"
+	mover_soldado: ;"1-Mover soldado      |   2-Salir del juego"
         ;Imprimir 'Mover soldado'
         mov rdi, txt_mover_soldado
         sub rsp,8
@@ -119,7 +341,7 @@ section .text
 		sub rsp,8
 		call error_ingreso
 		add rsp,8
-		jmp txt_elegir_oficial
+		jmp txt_elegir_soldado
 ;----------------------------------------------------------------
 
     txt_elegir_oficial: ;"1-Elige un oficial  |   2-Salir del juego"
@@ -164,6 +386,9 @@ section .text
 		call mover_oficial
 		add rsp,8
 
+		cmp byte[opcion],"2"
+    	je salida
+
         mov rdi, casilla_destino
 		sub rsp,8
 		call verificar_casilla_vacia
@@ -177,7 +402,7 @@ section .text
 
 ;----------------------------------------------------------------
 
-    mover_oficial: ;"1-Mover oficial (recibe casilla)     |   2-Salir del juego"
+    mover_oficial: ;"1-Mover oficial      |   2-Salir del juego"
         ;Imprimir 'Mover oficial'
         mov rdi, txt_mover_oficial
         sub rsp,8
@@ -251,7 +476,7 @@ section .text
         sub rsp,8
         call printf
         add rsp,8
-        mov rax,[sys_call]
+        mov rax, [sys_call]
         ret
 ;----------------------------------------------------------------
 
@@ -300,3 +525,5 @@ section .text
 ;----------------------------------------------------------------
 	salida:
         ret
+;----------------------------------------------------------------
+
