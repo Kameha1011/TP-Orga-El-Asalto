@@ -44,62 +44,16 @@ section .bss
 
 section .text
 main:
-    sub rsp, 8
-    call imprimir_tablero
-    add rsp,8
 
     sub rsp, 8
-    call empezar_juego
-    add rsp,8
-
-    cmp rax,[sys_call]
-    je fin
-    cmp byte[soldados_en_fuerte],9
-    je fin_fuerte
-    cmp byte[cantidad_soldados],8
-    je fin_soldado
-    cmp byte[cantidad_oficiales],0
-    je fin_oficial
-    jmp main
+    call menu_principal
+    add rsp, 8
 
     ret
-fin:
-    mov rax,[sys_call]
-    mov rdi,[exit_code]
-    syscall
-fin_oficial:
-    sub rsp, 8
-    call imprimir_tablero
-    add rsp,8
-    mov rdi, oficiales_insuficientes
-    sub rsp, 8
-    call printf
-    add rsp, 8
 
-    mov rax,[sys_call]
-    mov rdi,[exit_code]
-    syscall
-fin_soldado:
+limpiar_pantalla:
+    mov rdi, cmd_clear
     sub rsp, 8
-    call imprimir_tablero
-    add rsp,8
-    mov rdi, soldados_insuficientes
-    sub rsp, 8
-    call printf
+    call system
     add rsp, 8
-
-    mov rax,[sys_call]
-    mov rdi,[exit_code]
-    syscall
-fin_fuerte:
-    sub rsp, 8
-    call imprimir_tablero
-    add rsp,8
-    mov rdi, fuerte_tomado
-    sub rsp, 8
-    call printf
-    add rsp, 8
-
-    mov rax,[sys_call]
-    mov rdi,[exit_code]
-    syscall
+    ret
