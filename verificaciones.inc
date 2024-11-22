@@ -1,10 +1,10 @@
 ;Acá irá toda la logica del juego en si, mover piezas
-
 global juego
 section .data
     formato_numero db "%d", 0
     formato_prueba db "casilla: %s ,fila: %hi ,columna: %hi",10,0
     txt_casilla_vacia db "La casilla ingresada no está vacía",10,0
+    txt_casilla_no_ady db "La casilla ingresada no es adyacente (no puedes moverte mas de 1 casilla)",10,0
 section .bss
     buffer_casilla resw 1
     fila resw 1
@@ -117,9 +117,6 @@ obtener_fila_columna:
 verificar_casilla_vacia:
     mov byte[valido], 1
     sub rsp, 8
-    call obtener_fila_columna
-    add rsp, 8
-    sub rsp, 8
     call verificar_casilla_matriz
     add rsp, 8
     cmp byte[valido], 0
@@ -185,3 +182,36 @@ error_casilla_vacia:
     ret
 
 ;------------------------------------------------------------------
+verificar_casilla_destino_adyacente:
+    mov byte[valido],0
+    sub rsp,8
+    call obtener_adyacencias
+    add rsp,8
+    ;Recorrer matriz adyacencias para comparar cada elem con la casilla destino y ver si pertenece
+    mov rcx,0 ; i
+    mov rax,0; reiniciar rax
+recorrer_adyacencias_filas:
+    mov rdx,0
+    imul rdx,rcx,2 ; i*tamanoElem
+    mov ax,[buffer_casillas_ady + edx]; al = fila, ah = columna
+comparar_fila:
+    cmp al,[fila]
+    je comparar_columna
+    jmp continuar_iteracion_adyacentes
+comparar_columna:
+    cmp ah,[columna]
+    jne continuar_iteracion_adyacentes
+    mov byte[valido],1
+    jmp terminar_verificacion_ady
+continuar_iteracion_adyacentes:
+    inc rcx
+    cmp rcx,8
+    jl recorrer_adyacencias_filas
+error_casilla_no_ady:
+    mov rdi, txt_casilla_no_ady
+    sub rsp, 8
+    call printf
+    add rsp, 8
+terminar_verificacion_ady:
+    ret
+
