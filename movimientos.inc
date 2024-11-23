@@ -92,6 +92,11 @@ section .text
         imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
+        
+        mov byte[tiene_que_comer],0
+        sub rsp,8
+        call verificar_movimiento_oficial_valido
+        add rsp,8
 
         cmp byte[tiene_que_comer], 1 ;verifico si tenia que comer, si es asi no muevo el oficial, solo se elimina
         je bp_muere_oficial
@@ -368,7 +373,7 @@ eliminar_soldado:
             
             ;celda siguiente a adyacente ady = (part + dest)/2 => dest = (2 * ady) - part => thanks agus
 
-            ;movzx rax, word[rsi]
+
 
             movzx ax,[rsi]
             imul ax,2
@@ -393,18 +398,42 @@ eliminar_soldado:
                 add rsi,2  
                 add rdi,2
                 loop checkear_celda
-        ;si llega aca => movimiento valido
+        ;si llega aca => ya tengo todos los optimos
+        mov rcx,8
+        mov rdi,movimientos_optimos
+        loop_activar_flag_comio:
+            coincide_fila:
+                mov al,[rdi]
+                cmp byte[fila_destino],al
+                jne siguiente_loop_comio_oficial
+            
+            coincide_col:
+                mov ah,[rdi+1]
+                cmp byte[columna_destino],ah
+                je activar_flag_comio
+            siguiente_loop_comio_oficial:
+                add rdi,2
+                loop loop_activar_flag_comio
+
+
         ret
 
+        activar_flag_comio: ;podia comer y comio
+            mov byte[tiene_que_comer],0
+
         puede_comer: ;podia "comer" un soldado y no lo hizo, agrego a "movimientos_optimos"
-    
+            mov byte[tiene_que_comer],1 ;por lo menos una que podia comer
             mov al,[rsi]
             add al,al
             sub al,byte[fila_partida]
 
+            ;mov al,[rsi]
+
             mov ah,[rsi+1]
             add ah,ah
             sub ah,byte[columna_partida]
+            ;mov ah,[rsi+1]
+            
 
             
             mov [movimientos_optimos+r10],ax
