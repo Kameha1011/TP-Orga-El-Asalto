@@ -5,6 +5,7 @@ section .data
     formato_prueba db "casilla: %s ,fila: %hi ,columna: %hi",10,0
     txt_casilla_vacia db "La casilla ingresada no está vacía",10,0
     txt_casilla_no_ady db "La casilla ingresada no es adyacente (no puedes moverte mas de 1 casilla)",10,0
+    txt_error_ingreso_soldado db "Error en ingreso, la casilla ingresada no contiene un soldado",10,0
 section .bss
     buffer_casilla resw 1
     fila resw 1
@@ -140,21 +141,17 @@ verificar_casilla_vacia:
 verificar_casilla_eliminar_soldado:
     mov byte[valido], 1
 
-    movzx rax, word[fila_destino]
-    add rax, [fila_partida]
-    xor rdx,rdx  ;limpio rdx para evitar contenido basura
-    mov rbx, 2                ; Divisor
-    div rbx
-    mov [fila_partida], ax
-    movzx rax, word[fila_partida]   ; inicializo i filas
+    mov rdi, casilla_destino
+    sub rsp, 8
+    call obtener_fila_columna
+    add rsp, 8
+    mov dx, [fila]
+    mov [fila_destino], dx
+    mov dx, [columna]
+    mov [columna_destino], dx
 
-    mov ax, word[columna_destino]
-    add [columna_partida], ax
-    mov ax, word[columna_partida]
-    mov bx, 2
-    div bx
-    mov [columna_partida], ax
-    movzx rcx, word[columna_partida]   ;inicializo j columnas
+    movzx rax, word[fila_destino]   ; inicializo i filas
+    movzx rcx, word[columna_destino]   ;inicializo j columnas
 
     imul rax,7      ;i filas * cant columnas
     add  rax,rcx     ;(i filas * cant columnas) + j columnas
@@ -169,6 +166,10 @@ verificar_casilla_eliminar_soldado:
 
 ;------------------------------------------------------------------
 error_casilla:
+    mov rdi, txt_error_ingreso_soldado
+    sub rsp, 8
+    call printf
+    add rsp, 8
     mov byte[valido], 0
     ret
 

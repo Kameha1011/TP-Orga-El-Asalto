@@ -61,26 +61,26 @@ section .text
         sub rsp, 8
         call obtener_fila_columna
         add rsp, 8
-
         mov dx, [fila]
         mov [fila_destino], dx
         mov dx, [columna]
         mov [columna_destino], dx
 
     ;verificar condiciones
-
-        sub rsp, 8
-        call calcular_distancia_entre_casillas
-        add rsp, 8
-        cmp rax, 0  ;rax = resultado de calcular la distancia
-        je solo_mover_oficial
-        cmp rax, 1
-        jne error_casilla
-        cmp byte[tiene_que_comer], 1
+        sub rsp,8
+		call verificar_casilla_eliminar_soldado
+		add rsp,8
+        cmp byte[valido],1
         je comer_soldado
-        jmp error_casilla
 
     solo_mover_oficial:
+
+    	sub rsp,8
+		call verificar_casilla_vacia
+		add rsp,8
+    	cmp byte[valido],0
+    	je pedir_casilla_destino_oficial
+
         movzx rax, word[fila_partida]   ; inicializo i filas
         movzx rcx, word[columna_partida]   ;inicializo j columnas
 
@@ -113,11 +113,17 @@ section .text
 
     ;------------------------------------------------------------------
     comer_soldado:
+        cmp byte[tiene_que_comer], 0
+        je solo_mover_oficial
+
+        mov rdi, casilla_partida
         sub rsp, 8
-        call verificar_casilla_eliminar_soldado
+        call obtener_fila_columna
         add rsp, 8
-        cmp byte[valido], 0
-        je error_casilla
+        mov dx, [fila]
+        mov [fila_partida], dx
+        mov dx, [columna]
+        mov [columna_partida], dx
 
         movzx rax, word[fila_partida]   ; inicializo i filas
         movzx rcx, word[columna_partida]   ;inicializo j columnas
@@ -128,32 +134,9 @@ section .text
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
 
-        mov rdi, casilla_destino
-        sub rsp, 8
-        call obtener_fila_columna
-        add rsp, 8
-
-        mov dx, [fila]
-        mov [fila_destino], dx
-        mov dx, [columna]
-        mov [columna_destino], dx
-
 eliminar_soldado:
-        movzx rax, word[fila_destino]
-        add rax, [fila_partida]
-        xor rdx,rdx  ;limpio rdx para evitar contenido basura
-        mov rbx, 2   ; Divisor
-        div rbx
-        mov [fila_partida], ax
-        movzx rax, word[fila_partida]   ; inicializo i filas
-
-        mov ax, word[columna_destino]
-        add [columna_partida], ax
-        mov ax, word[columna_partida]
-        mov bx, 2
-        div bx
-        mov [columna_partida], ax
-        movzx rcx, word[columna_partida]   ;inicializo j columnas
+        movzx rax, word[fila_destino]; inicializo i filas
+        movzx rcx, word[columna_destino];inicializo j columnas
 
         imul rax,7      ;i filas * cant columnas
         add  rax,rcx     ;(i filas * cant columnas) + j columnas
@@ -161,9 +144,13 @@ eliminar_soldado:
 
         mov byte[matriz + rax], 1 ;marco la casilla del soldado como vacia
 
-
         movzx rax, word[fila_destino]   ; inicializo i filas
+        imul rax, rax, 2
+        sub rax, [fila_partida]
+
         movzx rcx, word[columna_destino]   ;inicializo j columnas
+        imul rcx, rcx, 2
+        sub rcx, [columna_partida]
 
         imul rax,7      ;i filas * cant columnas
         add  rax,rcx     ;(i filas * cant columnas) + j columnas
@@ -173,7 +160,7 @@ eliminar_soldado:
         mov byte[matriz + rax], bl ;marco la casilla de destino con el oficial
 
         dec byte[cantidad_soldados]
-        mov byte[comio?], 1
+        ;mov byte[comio?], 1 ;mas al pedo que bocina de avion
         ;cambio de turno
         mov byte[turno], 0
         ret
@@ -235,7 +222,7 @@ eliminar_soldado:
         devolver_ady:
             ret
     ;------------------------------------------------------------------
-    calcular_distancia_entre_casillas:
+    calcular_distancia_entre_casillas: ;no se va a usar
         mov byte[cumple_horizontal], 0
         mov byte[cumple_vertical], 0
         ; Calcular |x1 - x2|
