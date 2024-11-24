@@ -9,6 +9,10 @@ section .data
     salto_de_linea db 10, 0 ; 10 es el valor ASCII de salto de línea
     indices_columnas db "   0   1   2   3   4   5   6",10,0
     indices_columnas_180 db "   6   5   4   3   2   1   0",10,0
+    orientacion_4 db "Orientación:",10,"Filas: ↓,  Cols: ←",10,0
+    orientacion_2 db "Orientación:",10,"Filas: ←,  Cols: ↓",10,0
+    orientacion_3 db "Orientación:",10,"Filas: ↑,  Cols: →",10,0
+    orientacion_1 db "Orientación:",10,"Filas: →,  Cols: ↓",10,0
     indice_fila db "%i",0
     espacio_inicial db "        │",0
     espacio_final db "        ",0
@@ -116,6 +120,10 @@ continuar_iteracion:
     inc r12d
     cmp r12d, [filas]
     jl recorrer_filas
+    mov rdi, orientacion_1
+    sub rsp,8
+    call printf
+    add rsp,8
     ret
 
 ;(rotacion 180)
@@ -224,6 +232,10 @@ continuar_iteracion_2:
     dec r12d
     cmp r12d, 0
     jge recorrer_filas_2
+    mov rdi, orientacion_2
+    sub rsp,8
+    call printf
+    add rsp,8
     ret
 
 ;(rotacion 90)
@@ -328,6 +340,10 @@ continuar_iteracion_3:
     cmp r12d, 0
     jge recorrer_columnas_3
     mov rdi, indices_columnas
+    sub rsp,8
+    call printf
+    add rsp,8
+    mov rdi, orientacion_3
     sub rsp,8
     call printf
     add rsp,8
@@ -441,6 +457,10 @@ continuar_iteracion_4:
     inc r12d
     cmp r12d, 7
     jl recorrer_columnas_4
+    mov rdi, orientacion_4
+    sub rsp,8
+    call printf
+    add rsp,8
     ret
 
 ;*** Subrutinas ***
