@@ -304,6 +304,15 @@ section .text
 
     	cmp rax,[sys_call]
         je fin
+
+        sub rsp, 8 
+        call verificar_fuerte
+        add rsp, 8
+
+        sub rsp, 8 
+        call verificar_oficiales_y_solados
+        add rsp, 8
+
         cmp byte[soldados_en_fuerte],9
         je fin_fuerte
         cmp byte[cantidad_soldados],8
