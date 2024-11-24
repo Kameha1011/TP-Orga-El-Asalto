@@ -13,11 +13,11 @@ section .data
     txt_menu_nueva_partida_opciones db "1-Personalizar partida   |   2-Empezar partida por defecto   |   3-Volver atras   |   4-Salir del juego",10,0
     txt_menu_personalizar_partida db "Personalizar partida - Modificar",10,0
     txt_menu_personalizar_partida_opciones db "1-Simbolo de soldados   |   2-Simbolo de oficiales   |   3-Orientacion de tablero(arriba por defecto)  ",10,"4-Quien empieza(soldados por defecto)   |   5-Comenzar   |   6-Volver atras   |   7-Salir del juego",10,0
-    txt_simbolo_soldados db "Ingrese el simbolo de los soldados: ",0
-    txt_simbolo_oficiales db "Ingrese el simbolo de los oficiales: ",0
-    txt_orientacion_tablero db "Elija la orientacion del tablero (arriba por defecto): ",0
+    txt_simbolo_soldados db "Ingrese el simbolo de los soldados: ",10,0
+    txt_simbolo_oficiales db "Ingrese el simbolo de los oficiales: ",10,0
+    txt_orientacion_tablero db "Elija la orientacion del tablero (arriba por defecto): ",10,0
     txt_menu_orientacion_tablero db "1-Arriba   |   2-Abajo   |   3-Izquierda   |   4-Derecha   | 5-Volver",10,0
-    txt_quien_empieza db "1-Empiezan los soldados   |   2-Empiezan los oficiales   | 3-Volver",0
+    txt_quien_empieza db "1-Empiezan los soldados   |   2-Empiezan los oficiales   | 3-Volver",10,0
 
 
 
@@ -37,6 +37,8 @@ section .data
 
     ;saltar turno (preguntar a los profes) || opcion de rendirse en caso borde 1
 	formato_ingreso db "%s",0
+
+    orientacion_tablero db 1 ; 1 arriba, 2 abajo, 3 izquierda, 4 derecha
 
 section .bss
     opcion resb 1
@@ -111,7 +113,7 @@ section .text
         cmp byte[opcion],'1'
         je menu_personalizar_partida
         cmp byte[opcion],'2'
-        je juego
+        je partida_por_defecto
         cmp byte[opcion],'3'
         je menu_principal
         cmp byte[opcion],'4'
@@ -133,7 +135,7 @@ section .text
         call printf
         add rsp,8
 
-        mov rdi, txt_menu_personalizar_partida_opciones ;"1-Simbolo de soldados   |   2-Simbolo de oficiales   |   3-Orientacion de tablero(arriba por defecto)  ",10
+        mov rdi, txt_menu_personalizar_partida_opciones ;"1-Simbolo de soldados   |   2-Simbolo de oficiales   |   3-Orientacion de tablero(arriba por defecto)  "
                                                            ;"4-Quien empieza(soldados por defecto)   |   5-Comenzar   |   6-Volver atras   |   7-Salir del juego"
         sub rsp,8
         call printf
@@ -164,6 +166,15 @@ section .text
         jmp menu_personalizar_partida
 
 ;---------------------------------------------------------------------
+    partida_por_defecto:
+    	mov byte[simbolo_soldado],'X'
+    	mov byte[simbolo_oficial],'O'
+       	mov byte[orientacion_tablero],1
+    	mov byte[turno],0
+
+    	jmp juego
+
+;---------------------------------------------------------------------
     personalizar_simbolo_soldados:
         ;Imprimir 'Personalizar simbolo de soldados'
         mov rdi,txt_menu_principal    ;"Ingrese el simbolo de los soldados: "
@@ -172,11 +183,11 @@ section .text
         add rsp,8
 
         sub rsp,8
-        call leer_opcion
+        call leer_casilla
         add rsp,8
 
-        mov ax, [opcion]
-        mov [num_soldado], ax
+        mov ax, [casilla]
+        mov [simbolo_soldado], ax
 
         jmp menu_personalizar_partida
 
@@ -189,11 +200,11 @@ section .text
         add rsp,8
 
         sub rsp,8
-        call leer_opcion
+        call leer_casilla
         add rsp,8
 
-        mov ax, [opcion]
-        mov [num_oficial], ax
+        mov ax, [casilla]
+        mov [simbolo_oficial], ax
 
         jmp menu_personalizar_partida
 
@@ -233,6 +244,19 @@ section .text
         call error_ingreso
 		add rsp,8
         jmp personalizar_orientacion_tablero
+
+      orientacion_arriba:
+        mov byte[orientacion_tablero],1
+        jmp menu_personalizar_partida
+   	  orientacion_abajo:
+        mov byte[orientacion_tablero],2
+        jmp menu_personalizar_partida
+      orientacion_izquierda:
+        mov byte[orientacion_tablero],3
+        jmp menu_personalizar_partida
+      orientacion_derecha:
+    	mov byte[orientacion_tablero],4
+        jmp menu_personalizar_partida
 ;----------------------------------------------------------------------
     quien_empieza:
         ;Imprimir 'Quien empieza'
@@ -266,6 +290,7 @@ section .text
 
 ;----------------------------------------------------------------------
     juego:
+
         sub rsp, 8
     	call limpiar_pantalla
         add rsp, 8
@@ -486,10 +511,6 @@ section .text
         sub rsp, 8
         call obtener_fila_columna
         add rsp, 8
-        sub rsp,8
-        call verificar_casilla_destino_adyacente
-        add rsp,8
-    	cmp byte[valido],0
     	je pedir_casilla_destino_oficial
         
 		sub rsp,8

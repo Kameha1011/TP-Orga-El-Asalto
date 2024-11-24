@@ -1,8 +1,10 @@
 ; Todo lo relacionado a mostrar datos por pantalla
 ;extern matriz
 section .data
-    soldado db " X │",0
-    oficial db " O │",0
+    simbolo_soldado db "X",0
+    simbolo_oficial db "O",0
+    soldado db " %s │",0
+    oficial db " %s │",0
     casilla_vacia db "   │",0
     separador db "│",0
     salto_de_linea db 10, 0 ; 10 es el valor ASCII de salto de línea
@@ -18,6 +20,7 @@ section .data
 section .bss
 section .text
 global imprimir_tablero
+
 
 imprimir_tablero:
     mov r12d, 0 ; i
@@ -138,6 +141,7 @@ imprimir_casilla_ocupada:
     cmp byte[matriz + r13 + r15], 88
     je imprimir_casilla_soldado
     mov rdi, oficial
+    mov rsi, simbolo_oficial
     sub rsp, 8
     call printf
     add rsp, 8
@@ -145,6 +149,7 @@ imprimir_casilla_ocupada:
 
 imprimir_casilla_soldado:
     mov rdi, soldado
+    mov rsi, simbolo_soldado
     sub rsp, 8
     call printf
     add rsp, 8
