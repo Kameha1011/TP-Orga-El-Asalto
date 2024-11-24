@@ -333,6 +333,116 @@ continuar_iteracion_3:
     add rsp,8
     ret
 
+;(rotacion -90)
+imprimir_tablero_rotado_izq:
+    mov r12d, 0 ; j
+    mov rdi, indices_columnas_180
+    sub rsp,8
+    call printf
+    add rsp,8
+    sub rsp,8
+    call imprimir_separador_horizontal_inicial
+    add rsp,8
+recorrer_columnas_4:
+;inicializamos (j-1)*longitudElemento
+    mov r13d, [longitudElemento] ; Longitud de la columna
+    imul r13d, r12d; j * longitudElemento
+    mov r14d, 6 ; i
+    sub rsp,8
+    call imprimir_espacio_en_blanco
+    add rsp,8
+    ;Las siguientes dos comparaciones son para verificar si se debe imprimir el "espacio inicial" para dar forma al tablero
+    cmp r12d,1
+    jle imprimir_espacio_inicial_4
+    cmp r12d,5
+    jge imprimir_espacio_inicial_4
+    ;Si no pasó las dos comparaciones anteriores, simplemente imprime un separador que seria la "pared inicial" de cada fila que no empieza con espacios
+    sub rsp,8
+    call imprimir_separador
+    add rsp,8
+    jmp recorrer_filas_4
+imprimir_espacio_inicial_4:
+    mov rdi,espacio_inicial
+    sub rsp,8
+    call printf
+    add rsp,8
+recorrer_filas_4:
+    ;inicializamos (j-1)*longitudFila 
+    mov r15d, [longitudFila] ; Longitud de un elemento
+    imul r15d, r14d; i * longitudFila
+    sub rsp,8
+    call imprimir_casilla
+    add rsp,8
+    ;Incremento j y si j<columnas contiuo iterando por columnas
+    dec r14d
+    cmp r14d, 0
+    jge recorrer_filas_4
+    cmp r12d,1
+    jle imprimir_espacio_final_3
+    cmp r12d,5
+    jge imprimir_espacio_final_3
+    jmp continuar_a_salto_2
+imprimir_espacio_final_3:
+    mov rdi, espacio_final
+    sub rsp,8
+    call printf
+    add rsp,8
+continuar_a_salto_2:
+    mov rdi,indice_fila
+    mov esi, r12d
+    sub rsp,8
+    call printf
+    add rsp,8
+    sub rsp, 8
+    call imprimir_salto_de_linea
+    add rsp,8
+    ; En las siguientes comparaciones chequeo que en que fila estoy para imprimir el correspondiente "separador horizontal"
+    cmp r12d, 0 ; if i == 0
+    je imprimir_separador_corto_4 ; print ├───┼───┼───┤
+    cmp r12d, 5 ; if i == 5
+    je imprimir_separador_corto_4 ; print ├───┼───┼───┤
+    cmp r12d, 1 ; if i == 1
+    je imprimir_separador_horizontal_abajo_4 ; print ┌───┬───┼───┼───┼───┼───┬───┐
+    cmp r12d, 4 ; if i == 4
+    je imprimir_separador_horizontal_arriba_4 ; print └───┴───┼───┼───┼───┼───┴───┘
+    cmp r12d, 6 ; if i == 6
+    je imprimir_separador_horizontal_final_4; print └───┴───┴───┘ 
+imprimir_separador_horizontal_4:
+    mov rdi, separador_horizontal
+    sub rsp, 8
+    call printf
+    add rsp, 8
+    jmp continuar_iteracion_4
+imprimir_separador_horizontal_abajo_4:
+    mov rdi, separador_horizontal_abajo
+    sub rsp, 8
+    call printf
+    add rsp, 8
+    jmp continuar_iteracion_4
+imprimir_separador_horizontal_arriba_4:
+    mov rdi, separador_horizontal_arriba
+    sub rsp, 8
+    call printf
+    add rsp, 8
+    jmp continuar_iteracion_4
+imprimir_separador_corto_4:
+    mov rdi, separador_horizontal_corto
+    sub rsp, 8
+    call printf
+    add rsp, 8
+    jmp continuar_iteracion_4
+imprimir_separador_horizontal_final_4:
+    mov rdi, separador_horizontal_final
+    sub rsp, 8
+    call printf
+    add rsp, 8
+continuar_iteracion_4:
+    ;Incremento i y si i<filas contiuo iterando por filas
+    inc r12d
+    cmp r12d, 7
+    jl recorrer_columnas_4
+    ret
+
 ;*** Subrutinas ***
 
 imprimir_salto_de_linea:

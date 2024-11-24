@@ -270,7 +270,7 @@ section .text
     	call limpiar_pantalla
         add rsp, 8
     	sub rsp, 8
-		call imprimir_tablero
+		call imprimir_tablero_rotado_izq
 	    add rsp,8
 
     	sub rsp, 8
