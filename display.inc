@@ -1,8 +1,10 @@
 ; Todo lo relacionado a mostrar datos por pantalla
 ;extern matriz
 section .data
-    soldado db " X │",0
-    oficial db " O │",0
+    simbolo_soldado db "X",0
+    simbolo_oficial db "O",0
+    soldado db " %s │",0
+    oficial db " %s │",0
     casilla_vacia db "   │",0
     separador db "│",0
     espacio_en_blanco db " ",0
@@ -28,6 +30,7 @@ global imprimir_tablero_rotado_arriba
 ; rotar_arriba(180g respecto del fuerte) indices columnas -> Abajo, indices filas -> Derecha (imprimir desde ultima fila de derecha a izq)
 ; rotar_izquierda(-90g respecto del fuerte) indices columnas -> derecha, indices filas -> Arriba (imprimir por cols desde la primera)
 ; rotar_derecha(90g respecto del fuerte) indices columnas -> Izquierda, indices filas -> abajo (imprimir por cols desde la ultima)
+
 
 
 imprimir_tablero:
@@ -490,6 +493,7 @@ imprimir_casilla_ocupada:
     cmp byte[matriz + r13 + r15], 88
     je imprimir_casilla_soldado
     mov rdi, oficial
+    mov rsi, simbolo_oficial
     sub rsp, 8
     call printf
     add rsp, 8
@@ -497,6 +501,7 @@ imprimir_casilla_ocupada:
 
 imprimir_casilla_soldado:
     mov rdi, soldado
+    mov rsi, simbolo_soldado
     sub rsp, 8
     call printf
     add rsp, 8

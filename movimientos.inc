@@ -1,7 +1,7 @@
 global movimientos
 
 section .data
-    tiene_que_comer db 0
+    tiene_que_comer db 1
     ;flags para la distancia entre casillas
     cumple_horizontal db 0
     cumple_vertical db 0
@@ -15,7 +15,6 @@ section .bss
     buffer_casilla_ady resw 1
 
     comio? resw 1
-
 
 section .text
     movimientos:
@@ -69,6 +68,7 @@ section .text
         mov [columna_destino], dx
 
     ;verificar condiciones
+
         sub rsp, 8
         call calcular_distancia_entre_casillas
         add rsp, 8
@@ -142,7 +142,7 @@ eliminar_soldado:
         movzx rax, word[fila_destino]
         add rax, [fila_partida]
         xor rdx,rdx  ;limpio rdx para evitar contenido basura
-        mov rbx, 2                ; Divisor
+        mov rbx, 2   ; Divisor
         div rbx
         mov [fila_partida], ax
         movzx rax, word[fila_partida]   ; inicializo i filas

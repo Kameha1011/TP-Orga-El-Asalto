@@ -16,10 +16,10 @@ section .data
     casilla_destino dw "",0 ;casilla a la cual se quiere mover el jugador
     formato_casilla db "Elegiste el oficial de la %hi, y quieres moverlo a la casilla %hi",10, 0
 
-    global matriz ;0 casilla invalida - 88 casilla soldado - 79 casilla oficial - 1 casilla vacia
+    global matriz ;0 casilla invalida - 1 casilla vacia - 2 casilla soldado - 3 casilla oficial
     matriz db  0,   0,  88, 88, 88,  0,   0  ; Fila 0
            db  0,   0,  88, 88, 88,  0,   0  ; Fila 1
-           db 88,  88,  88, 88, 88, 88,  88  ; Fila 2
+           db 88,  88,  88, 88, 88, 88,  88  ; Fila 88
            db 88,  88,  88, 88, 88, 88,  88  ; Fila 3
            db 88,  88,   1,  1, 1, 88,  88  ; Fila 4
            db  0,   0,   1,  1, 79,  0,   0  ; Fila 5
@@ -31,16 +31,14 @@ section .data
     num_oficial db 79
     num_soldado db 88
 
-
-    soldados_en_fuerte db 0
-    cantidad_oficiales db 2
-    cantidad_soldados db 24
-
     vacio db 1
     sys_call dq 60
     exit_code dq 0
 section .bss
     casilla resb 2 ;casilla a la que se quiere mover el jugador
+    soldados_en_fuerte resb 1
+    cantidad_oficiales resb 1
+    cantidad_soldados resb 1
 
 section .text
 main:
