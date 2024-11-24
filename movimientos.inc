@@ -376,12 +376,12 @@ eliminar_soldado:
 
 
             movzx ax,[rsi]
-            imul ax,2
-            sub ax,[fila_partida]
+            ;imul ax,2          outdated => era para usar la casilla siguiente a la adyacente 
+            ;sub ax,[fila_partida]
 
             movzx bx,[rsi+1]
-            imul bx,2
-            sub bx,[columna_partida]
+            ;imul bx,2
+            ;sub bx,[columna_partida]
           
             ;traducir a desface
             sub rsp,8
@@ -423,16 +423,15 @@ eliminar_soldado:
 
         puede_comer: ;podia "comer" un soldado y no lo hizo, agrego a "movimientos_optimos"
             mov byte[tiene_que_comer],1 ;por lo menos una que podia comer
+            
             mov al,[rsi]
-            add al,al
-            sub al,byte[fila_partida]
-
-            ;mov al,[rsi]
+            ;add al,al          outdated => era para usar la casilla siguiente a la adyacente 
+            ;sub al,byte[fila_partida]
 
             mov ah,[rsi+1]
-            add ah,ah
-            sub ah,byte[columna_partida]
-            ;mov ah,[rsi+1]
+            ;add ah,ah
+            ;sub ah,byte[columna_partida]
+            
             
 
             
