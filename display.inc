@@ -22,8 +22,8 @@ section .bss
 section .text
 global imprimir_tablero_rotado_arriba
 ; rotar_arriba(180g respecto del fuerte) indices columnas -> Abajo, indices filas -> Derecha (imprimir desde ultima fila de derecha a izq)
-; rotar_izquierda(90g respecto del fuerte) indices columnas -> derecha, indices filas -> Arriba (imprimir por cols desde la ultima)
-; rotar_derecha(-90g respecto del fuerte) indices columnas -> Izquierda, indices filas -> abajo (imprimir por cols desde la primera)
+; rotar_izquierda(-90g respecto del fuerte) indices columnas -> derecha, indices filas -> Arriba (imprimir por cols desde la primera)
+; rotar_derecha(90g respecto del fuerte) indices columnas -> Izquierda, indices filas -> abajo (imprimir por cols desde la ultima)
 
 
 imprimir_tablero:
@@ -224,6 +224,113 @@ continuar_iteracion_2:
     dec r12d
     cmp r12d, 0
     jge recorrer_filas_2
+    ret
+
+;(rotacion 90)
+imprimir_tablero_rotado_der:
+    mov r12d, 6 ; j
+    sub rsp,8
+    call imprimir_separador_horizontal_inicial
+    add rsp,8
+recorrer_columnas_3:
+;inicializamos (j-1)*longitudElemento
+    mov r13d, [longitudElemento] ; Longitud de la columna
+    imul r13d, r12d; j * longitudElemento
+    mov r14d, 0 ; i
+    mov rdi,indice_fila
+    mov esi, r12d
+    sub rsp,8
+    call printf
+    add rsp,8
+    ;Las siguientes dos comparaciones son para verificar si se debe imprimir el "espacio inicial" para dar forma al tablero
+    cmp r12d,1
+    jle imprimir_espacio_inicial_3
+    cmp r12d,5
+    jge imprimir_espacio_inicial_3
+    ;Si no pasó las dos comparaciones anteriores, simplemente imprime un separador que seria la "pared inicial" de cada fila que no empieza con espacios
+    sub rsp,8
+    call imprimir_separador
+    add rsp,8
+    jmp recorrer_filas_3
+imprimir_espacio_inicial_3:
+    mov rdi,espacio_inicial
+    sub rsp,8
+    call printf
+    add rsp,8
+recorrer_filas_3:
+    ;inicializamos (j-1)*longitudFila 
+    mov r15d, [longitudFila] ; Longitud de un elemento
+    imul r15d, r14d; i * longitudFila
+    sub rsp,8
+    call imprimir_casilla
+    add rsp,8
+    ;Incremento j y si j<columnas contiuo iterando por columnas
+    inc r14d
+    cmp r14d, 7
+    jl recorrer_filas_3
+    cmp r12d,1
+    jle imprimir_espacio_final_2
+    cmp r12d,5
+    jge imprimir_espacio_final_2
+    jmp continuar_a_salto
+imprimir_espacio_final_2:
+    mov rdi, espacio_final
+    sub rsp,8
+    call printf
+    add rsp,8
+continuar_a_salto:
+    sub rsp, 8
+    call imprimir_salto_de_linea
+    add rsp,8
+    ; En las siguientes comparaciones chequeo que en que fila estoy para imprimir el correspondiente "separador horizontal"
+    cmp r12d, 6 ; if i == 6
+    je imprimir_separador_corto_3 ; print ├───┼───┼───┤
+    cmp r12d, 1 ; if i == 1
+    je imprimir_separador_corto_3 ; print ├───┼───┼───┤
+    cmp r12d, 5 ; if i == 5
+    je imprimir_separador_horizontal_abajo_3 ; print ┌───┬───┼───┼───┼───┼───┬───┐
+    cmp r12d, 2 ; if i == 2
+    je imprimir_separador_horizontal_arriba_3 ; print └───┴───┼───┼───┼───┼───┴───┘
+    cmp r12d, 0 ; if i == 0
+    je imprimir_separador_horizontal_final_3; print └───┴───┴───┘ 
+imprimir_separador_horizontal_3:
+    mov rdi, separador_horizontal
+    sub rsp, 8
+    call printf
+    add rsp, 8
+    jmp continuar_iteracion_3
+imprimir_separador_horizontal_abajo_3:
+    mov rdi, separador_horizontal_abajo
+    sub rsp, 8
+    call printf
+    add rsp, 8
+    jmp continuar_iteracion_3
+imprimir_separador_horizontal_arriba_3:
+    mov rdi, separador_horizontal_arriba
+    sub rsp, 8
+    call printf
+    add rsp, 8
+    jmp continuar_iteracion_3
+imprimir_separador_corto_3:
+    mov rdi, separador_horizontal_corto
+    sub rsp, 8
+    call printf
+    add rsp, 8
+    jmp continuar_iteracion_3
+imprimir_separador_horizontal_final_3:
+    mov rdi, separador_horizontal_final
+    sub rsp, 8
+    call printf
+    add rsp, 8
+continuar_iteracion_3:
+    ;Incremento i y si i<filas contiuo iterando por filas
+    dec r12d
+    cmp r12d, 0
+    jge recorrer_columnas_3
+    mov rdi, indices_columnas
+    sub rsp,8
+    call printf
+    add rsp,8
     ret
 
 ;*** Subrutinas ***
