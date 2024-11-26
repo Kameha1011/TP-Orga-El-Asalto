@@ -24,9 +24,9 @@ section .data
     txt_menu_juego db "Menú de juego",10,0
 
     txt_turno_soldado db "1-Elige un soldado   |   2-Salir del juego",10,0
-    txt_mover_soldado db "1-Mover soldado      |   2-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas.
+    txt_mover_soldado db "1-Mover soldado      |   2-Volver atras   |   3-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas.
     txt_turno_oficial db "1-Elige un oficial   |   2-Salir del juego",10,0
-    txt_mover_oficial db "1-Mover oficial      |   2-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas. (ver el caso si se saltó una captura)
+    txt_mover_oficial db "1-Mover oficial      |   2-Volver atras   |   3-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas. (ver el caso si se saltó una captura)
     txt_salir_juego db "Saliendo ...",10,0
 
     txt_error_ingreso db "Error en ingreso",10,0
@@ -170,7 +170,7 @@ section .text
     	mov byte[simbolo_soldado],'X'
     	mov byte[simbolo_oficial],'O'
        	mov byte[orientacion_tablero],1
-    	mov byte[turno],0
+    	mov byte[turno],1
 
     	jmp juego
 
@@ -423,18 +423,20 @@ section .text
     	call mover_soldado
     	add rsp,8
 
-    	cmp byte[opcion],"2"
+    	cmp byte[opcion],"3"
     	je salida
 
-        mov rdi, casilla_destino
-        sub rsp, 8
-        call obtener_fila_columna
-        add rsp, 8
+       	obtener_fila_columna casilla_destino, fila_destino, columna_destino
         sub rsp,8
         call verificar_casilla_destino_adyacente
         add rsp,8
     	cmp byte[valido],0
     	je pedir_casilla_destino_soldado
+
+    	mov ax, [fila_destino]
+        mov [fila],ax
+        mov ax, [columna_destino]
+        mov [columna],ax
        	sub rsp,8
     	call verificar_casilla_vacia
     	add rsp,8
@@ -449,7 +451,7 @@ section .text
 ;-----------------------------------------------------------------
 
 
-	mover_soldado: ;"1-Mover soldado      |   2-Salir del juego"
+	mover_soldado: ;"1-Mover soldado      |   2-Volver atras   |   3-Salir del juego"
         ;Imprimir 'Mover soldado'
         mov rdi, txt_mover_soldado
         sub rsp,8
@@ -463,6 +465,8 @@ section .text
         cmp byte[opcion],"1"
        	je leer_casilla
         cmp byte[opcion],"2"
+       	je txt_elegir_soldado
+        cmp byte[opcion],"3"
        	je salir_juego
 
 		sub rsp,8
@@ -503,28 +507,29 @@ section .text
 
     	cmp byte[valido],0
     	je casilla_invalida_oficial
+
         ;si es valido
+    	mov ax, [casilla]
+        mov [casilla_partida],ax
     	mov ax, [fila]
         mov [fila_partida],ax
         mov ax, [columna]
         mov [columna_partida],ax
+
 	pedir_casilla_destino_oficial:
 		sub rsp,8
 		call mover_oficial
 		add rsp,8
 
-		cmp byte[opcion],"2"
+		cmp byte[opcion],"3"
     	je salida
 
-        mov rdi, casilla_destino
-        sub rsp, 8
-        call obtener_fila_columna
-        add rsp, 8
+		obtener_fila_columna casilla_destino, fila_destino, columna_destino
+        sub rsp,8
+        call verificar_casilla_destino_adyacente
+        add rsp,8
+    	cmp byte[valido],0
     	je pedir_casilla_destino_oficial
-        
-		sub rsp,8
-		call verificar_casilla_vacia
-		add rsp,8
 
 		cmp byte[valido],1
 		je movimiento_oficial
@@ -534,7 +539,7 @@ section .text
 
 ;----------------------------------------------------------------
 
-    mover_oficial: ;"1-Mover oficial      |   2-Salir del juego"
+    mover_oficial: ;"1-Mover oficial      |   2-Volver atras   |   3-Salir del juego"
         ;Imprimir 'Mover oficial'
         mov rdi, txt_mover_oficial
         sub rsp,8
@@ -548,6 +553,8 @@ section .text
         cmp byte[opcion],"1"
        	je leer_casilla
         cmp byte[opcion],"2"
+       	je txt_elegir_oficial
+        cmp byte[opcion],"3"
        	je salir_juego
 
         sub rsp,8

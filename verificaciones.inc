@@ -12,19 +12,25 @@ section .data
     largo_fortaleza dd 3 ;Largo de la fortaleza
     total_elementos dd 49 ; cantidad total de elementos en la matriz
 
+    txt_error_ingreso_soldado db "Error en ingreso, la casilla ingresada no contiene un soldado",10,0
 section .bss
     buffer_casilla resw 1
+
     fila resw 1
     columna resw 1
+	fila_partida resw 1
+    columna_partida resw 1
+    fila_destino resw 1
+    columna_destino resw 1
+
+	oficial_1o2 resb 1
+	soldado_por_cumplir resb 1
 section .text
 ;------------------------------------------------------------------
 ;Verificar si la casilla ingresada contiene un soldado
 verificar_casilla_soldado:
     mov byte[valido], 1
-    mov rdi, casilla
-    sub rsp, 8
-    call obtener_fila_columna
-    add rsp, 8
+    obtener_fila_columna casilla, fila, columna
     sub rsp, 8
     call verificar_casilla_matriz
     add rsp, 8
@@ -49,10 +55,7 @@ verificar_casilla_soldado:
 ;Verificar si la casilla ingresada contiene un oficial
 verificar_casilla_oficial:
     mov byte[valido], 1
-    mov rdi, casilla
-    sub rsp, 8
-    call obtener_fila_columna
-    add rsp, 8
+    obtener_fila_columna casilla , fila, columna
     sub rsp, 8
     call verificar_casilla_matriz
     add rsp, 8
@@ -96,28 +99,6 @@ casilla_col_invalida:
     jg error_casilla
 
     ret
-;------------------------------------------------------------------
-;ingresar la casilla en rdi
-obtener_fila_columna:
-
-    ; Obtener casilla a formato entero
-    mov rsi, formato_numero
-    mov rdx, buffer_casilla
-    sub rsp, 8
-    call sscanf
-    add rsp, 8
-
-    mov ax, word[buffer_casilla]    ; Cargar el número completo (ej. 23) en AX
-    mov bx, 10                ; Divisor (base 10)
-    div bx                    ; Divide AX entre BX: AL = AX / BX (cociente), AH = AX % BX (residuo)
-
-    ; Guardar fila y columna
-    mov [fila], ax            ; Fila (cociente) en AX
-    mov [columna], dx         ; Columna (residuo) en DX
-
-    mov word[buffer_casilla], 0   ; Limpiar buffer
-
-    ret
 
 ;------------------------------------------------------------------
 ;ingresar la casilla en rdi
@@ -147,21 +128,10 @@ verificar_casilla_vacia:
 verificar_casilla_eliminar_soldado:
     mov byte[valido], 1
 
-    movzx rax, word[fila_destino]
-    add rax, [fila_partida]
-    xor rdx,rdx  ;limpio rdx para evitar contenido basura
-    mov rbx, 2                ; Divisor
-    div rbx
-    mov [fila_partida], ax
-    movzx rax, word[fila_partida]   ; inicializo i filas
+	obtener_fila_columna casilla_destino, fila_destino, columna_destino
 
-    mov ax, word[columna_destino]
-    add [columna_partida], ax
-    mov ax, word[columna_partida]
-    mov bx, 2
-    div bx
-    mov [columna_partida], ax
-    movzx rcx, word[columna_partida]   ;inicializo j columnas
+    movzx rax, word[fila_destino]   ; inicializo i filas
+    movzx rcx, word[columna_destino]   ;inicializo j columnas
 
     imul rax,7      ;i filas * cant columnas
     add  rax,rcx     ;(i filas * cant columnas) + j columnas
@@ -176,6 +146,10 @@ verificar_casilla_eliminar_soldado:
 
 ;------------------------------------------------------------------
 error_casilla:
+    mov rdi, txt_error_ingreso_soldado
+    sub rsp, 8
+    call printf
+    add rsp, 8
     mov byte[valido], 0
     ret
 
@@ -202,11 +176,11 @@ recorrer_adyacencias_filas:
     imul rdx,rcx,2 ; i*tamanoElem
     mov ax,[buffer_casillas_ady + edx]; al = fila, ah = columna
 comparar_fila:
-    cmp al,[fila]
+    cmp al,[fila_destino]
     je comparar_columna
     jmp continuar_iteracion_adyacentes
 comparar_columna:
-    cmp ah,[columna]
+    cmp ah,[columna_destino]
     jne continuar_iteracion_adyacentes
     mov byte[valido],1
     jmp terminar_verificacion_ady
@@ -229,7 +203,7 @@ verificar_fuerte:
     call contar_piezas
 
 terminar_verificacion_fuerte:
-    ret    
+    ret
 
 contar_piezas:
     mov ecx, 0 ; Contador de filas recorridas
@@ -274,7 +248,7 @@ verificar_oficiales_y_solados:
     mov ebx, 0           ; Índice para recorrer la matriz
     mov ecx, [total_elementos] ; ECX tiene el total de elementos a recorrer
     mov esi, matriz      ; ESI apunta al inicio de la matriz
-    
+
 contar_casillas:
     ; Verificamos el valor en la posición actual de la matriz
     mov al, [esi + ebx]
@@ -299,3 +273,13 @@ incrementar_soldados:
 incrementar_oficiales:
     inc byte [cantidad_oficiales]
     jmp siguiente_elemento
+;------------------------------------------------------------------------------------
+verificar_que_oficial_soy:
+    movzx rax, byte[posicion_oficial1]
+    cmp [casilla_partida], rax
+	je soy_oficial1
+	mov byte[oficial_1o2], 0 ;caso oficial 2
+    ret
+  soy_oficial1:
+	mov byte[oficial_1o2], 1
+    ret

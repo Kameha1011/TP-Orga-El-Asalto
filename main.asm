@@ -13,7 +13,10 @@ section .data
 
 
     turno db 0  ;0 si es turno del jugador 1(soldado), 1 si es turno del jugador 2(oficial)
+    casilla_partida dw "",0 ;casilla de la cual se quiere mover el jugador
     casilla_destino dw "",0 ;casilla a la cual se quiere mover el jugador
+    posicion_oficial1 dw "62",0
+    posicion_oficial2 dw "54",0
     formato_casilla db "Elegiste el oficial de la %hi, y quieres moverlo a la casilla %hi",10, 0
 
     global matriz ;0 casilla invalida - 1 casilla vacia - 2 casilla soldado - 3 casilla oficial
