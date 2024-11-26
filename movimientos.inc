@@ -26,14 +26,15 @@ section .text
 
     ;------------------------------------------------------------------
     movimiento_soldado:
-        movzx rax, word[fila_partida]   ; inicializo i filas
-        movzx rcx, word[columna_partida]   ;inicializo j columnas
+        ;movi para abajo para no marcar la casilla de partida de soldado como vacia antes de validar si el movimiento es valido
+        ;movzx rax, word[fila_partida]   ; inicializo i filas
+        ;movzx rcx, word[columna_partida]   ;inicializo j columnas
 
-        imul rax,7      ;i filas * cant columnas
-        add  rax,rcx     ;(i filas * cant columnas) + j columnas
-        imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
+        ;imul rax,7      ;i filas * cant columnas
+        ;add  rax,rcx     ;(i filas * cant columnas) + j columnas
+        ;imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
-        mov byte[matriz + rax], 1 ;marco la casilla del soldado como vacia
+        ;mov byte[matriz + rax], 1 ;marco la casilla del soldado como vacia
 
         mov rdi, casilla_destino
         sub rsp, 8
@@ -44,6 +45,23 @@ section .text
         mov [fila_destino], dx
         mov dx, [columna]
         mov [columna_destino], dx
+
+        sub rsp,8
+        call verificar_movimiento_soldado_valido
+        add rsp,8
+        cmp byte[valido],0
+        je error_casilla
+
+        movzx rax, word[fila_partida]   ; inicializo i filas
+        movzx rcx, word[columna_partida]   ;inicializo j columnas
+
+        imul rax,7      ;i filas * cant columnas
+        add  rax,rcx     ;(i filas * cant columnas) + j columnas
+        imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
+
+        mov byte[matriz + rax], 1 ;marco la casilla del soldado como vacia
+
+
 
         movzx rax, word[fila_destino]   ; inicializo i filas
         movzx rcx, word[columna_destino]   ;inicializo j columnas
@@ -373,15 +391,18 @@ eliminar_soldado:
             
             ;celda siguiente a adyacente ady = (part + dest)/2 => dest = (2 * ady) - part => thanks agus
 
-
-
+            ;-------------
+            ;movzx ax,[rsi]
+            ;movzx bx,[rsi+1]
+            ;-------------  outdated => era para usar la casilla siguiente a la adyacente 
             movzx ax,[rsi]
-            ;imul ax,2          outdated => era para usar la casilla siguiente a la adyacente 
-            ;sub ax,[fila_partida]
-
+            imul ax,2          
+            sub ax,[fila_partida]
+            
             movzx bx,[rsi+1]
-            ;imul bx,2
-            ;sub bx,[columna_partida]
+            imul bx,2
+            sub bx,[columna_partida]
+            ;-------------
           
             ;traducir a desface
             sub rsp,8
@@ -425,12 +446,16 @@ eliminar_soldado:
             mov byte[tiene_que_comer],1 ;por lo menos una que podia comer
             
             mov al,[rsi]
-            ;add al,al          outdated => era para usar la casilla siguiente a la adyacente 
-            ;sub al,byte[fila_partida]
+            ;------------;outdated => era para usar la casilla siguiente a la adyacente 
+            add al,al          
+            sub al,byte[fila_partida]
+            ;------------
 
             mov ah,[rsi+1]
-            ;add ah,ah
-            ;sub ah,byte[columna_partida]
+            ;------------;outdated => era para usar la casilla siguiente a la adyacente 
+            add ah,ah
+            sub ah,byte[columna_partida]
+            ;------------
             
             
 
@@ -441,6 +466,61 @@ eliminar_soldado:
         
 
     ;------------------------------------------------------------------
+
+    verificar_movimiento_soldado_valido:
+        
+        cmp byte[fila_destino],6
+        jg movimiento_soldado_invalido
+
+        cmp byte[fila_destino],1
+        jl movimiento_soldado_invalido
+
+        cmp byte[columna_destino],6
+        jg movimiento_soldado_invalido
+
+        cmp byte[columna_destino],0
+        jl movimiento_soldado_invalido
+
+        cmp byte[fila_partida],4
+        je validar_mov_horizontal
+        jne validar_mov_vertical_diagonal
+
+        validar_mov_horizontal:
+
+            cmp byte[columna_partida],2
+            jle lado_izq
+            cmp byte[columna_partida],6
+            jge lado_der
+            jmp validar_mov_vertical_diagonal
+            lado_izq:
+                mov al,[columna_partida]
+                cmp al,[columna_destino]
+                jge movimiento_soldado_invalido
+            ret
+            lado_der:
+                mov al,[columna_partida]
+                cmp al,[columna_destino]
+                jle movimiento_soldado_invalido
+            ret
+
+        validar_mov_vertical_diagonal:
+            mov al,[fila_partida]
+            cmp al,[fila_destino]
+            jge movimiento_soldado_invalido
+            
+        ret
+        movimiento_soldado_invalido:
+            mov byte[valido],0 ;0 invalido, 1 valido
+            ;sub rsp,8
+            ;mov rsi, txt_movimiento_soldado_invalido
+            ;call printf
+            ;add rsp,8
+            
+        ret
+
+            
+        
+
 
 
 

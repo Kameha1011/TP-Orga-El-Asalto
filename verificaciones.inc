@@ -5,6 +5,7 @@ section .data
     formato_prueba db "casilla: %s ,fila: %hi ,columna: %hi",10,0
     txt_casilla_vacia db "La casilla ingresada no está vacía",10,0
     txt_casilla_no_ady db "La casilla ingresada no es adyacente (no puedes moverte mas de 1 casilla)",10,0
+    txt_movimiento_soldado_invalido db "El movimiento es invalido. Recuerda que los soldados deben moverse hacia la fortaleza.",10,0
 section .bss
     buffer_casilla resw 1
     fila resw 1
