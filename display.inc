@@ -31,7 +31,15 @@ global imprimir_tablero_rotado_arriba
 ; rotar_izquierda(-90g respecto del fuerte) indices columnas -> derecha, indices filas -> Arriba (imprimir por cols desde la primera)
 ; rotar_derecha(90g respecto del fuerte) indices columnas -> Izquierda, indices filas -> abajo (imprimir por cols desde la ultima)
 
-
+elegir_orientacion:
+    cmp byte[orientacion_tablero],1
+    je imprimir_tablero
+    cmp byte[orientacion_tablero],2
+    je imprimir_tablero_rotado_arriba
+    cmp byte[orientacion_tablero],3
+    je imprimir_tablero_rotado_izq
+    cmp byte[orientacion_tablero],4
+    je imprimir_tablero_rotado_der
 
 imprimir_tablero:
     mov r12d, 0 ; i
