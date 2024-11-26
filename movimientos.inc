@@ -1,20 +1,25 @@
 global movimientos
 
+%macro obtener_fila_columna 3
+   	mov al, byte[%1]                ; Dirección de la casilla (entrada)
+	mov ah, byte[%1+1]
+
+    sub al, '0' ; Convertir de ASCII a número
+    sub ah, '0' ; Convertir de ASCII a número
+    ; Guardar fila y columna
+    mov byte[%2], al             ; Fila (cociente) en AX
+    mov byte[%3], ah             ; Columna (residuo) en DX
+
+%endmacro
+
 section .data
     tiene_que_comer db 1
-    ;flags para la distancia entre casillas
-    cumple_horizontal db 0
-    cumple_vertical db 0
 section .bss
 
-    fila_partida resw 1
-    columna_partida resw 1
-    fila_destino resw 1
-    columna_destino resw 1
+
     buffer_casillas_ady resw 8
     buffer_casilla_ady resw 1
 
-    comio? resw 1
 
 section .text
     movimientos:
@@ -31,15 +36,7 @@ section .text
 
         mov byte[matriz + rax], 1 ;marco la casilla del soldado como vacia
 
-        mov rdi, casilla_destino
-        sub rsp, 8
-        call obtener_fila_columna
-        add rsp, 8
-
-        mov dx, [fila]
-        mov [fila_destino], dx
-        mov dx, [columna]
-        mov [columna_destino], dx
+       obtener_fila_columna casilla_destino, fila_destino, columna_destino
 
         movzx rax, word[fila_destino]   ; inicializo i filas
         movzx rcx, word[columna_destino]   ;inicializo j columnas
@@ -57,16 +54,10 @@ section .text
     ;------------------------------------------------------------------
     movimiento_oficial:
         ;obtener fila y columna de la casilla de destino
-        mov rdi, casilla_destino
-        sub rsp, 8
-        call obtener_fila_columna
-        add rsp, 8
-        mov dx, [fila]
-        mov [fila_destino], dx
-        mov dx, [columna]
-        mov [columna_destino], dx
 
-    ;verificar condiciones
+        obtener_fila_columna casilla_destino, fila_destino, columna_destino
+
+      ;verificar condiciones
         sub rsp,8
 		call verificar_casilla_eliminar_soldado
 		add rsp,8
@@ -74,6 +65,10 @@ section .text
         je comer_soldado
 
     solo_mover_oficial:
+        mov ax, [fila_destino]
+        mov [fila], ax
+        mov ax, [columna_destino]
+        mov [columna], ax
 
     	sub rsp,8
 		call verificar_casilla_vacia
@@ -90,10 +85,6 @@ section .text
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
 
-        cmp byte[tiene_que_comer], 1 ;verifico si tenia que comer, si es asi no muevo el oficial, solo se elimina
-        je bp_muere_oficial
-
-
         movzx rax, word[fila_destino]   ; inicializo i filas
         movzx rcx, word[columna_destino]   ;inicializo j columnas
 
@@ -103,27 +94,33 @@ section .text
 
         mov bl, [num_oficial]
         mov byte[matriz + rax], bl ;marco la casilla de destino con el oficial
+
+        cmp byte[tiene_que_comer], 1
+        je eliminar_oficial
+
+actualizar_posicion_oficial:
+	;ACTUALIZO LA POSICION DEL OFICIAL ELEGIDO
+        mov bl, [casilla_destino]
+        ;chequear si mi casilla_partida pertenece a mi oficial1 o a mi oficial2
+        sub rsp,8
+        call verificar_que_oficial_soy
+        add rsp,8
+        cmp byte[oficial_1o2], 1
+        je oficial1
+        mov byte[posicion_oficial2], bl
+        jmp cambio_turno_oficial
+        oficial1:
+        mov byte[posicion_oficial1], bl
+
         jmp cambio_turno_oficial
 
-    bp_muere_oficial:
-        dec byte[cantidad_oficiales]
-    cambio_turno_oficial:
-        mov byte[turno], 0
-        ret
 
     ;------------------------------------------------------------------
     comer_soldado:
         cmp byte[tiene_que_comer], 0
         je solo_mover_oficial
 
-        mov rdi, casilla_partida
-        sub rsp, 8
-        call obtener_fila_columna
-        add rsp, 8
-        mov dx, [fila]
-        mov [fila_partida], dx
-        mov dx, [columna]
-        mov [columna_partida], dx
+        obtener_fila_columna casilla_partida, fila_partida, columna_partida
 
         movzx rax, word[fila_partida]   ; inicializo i filas
         movzx rcx, word[columna_partida]   ;inicializo j columnas
@@ -144,13 +141,16 @@ eliminar_soldado:
 
         mov byte[matriz + rax], 1 ;marco la casilla del soldado como vacia
 
-        movzx rax, word[fila_destino]   ; inicializo i filas
-        imul rax, rax, 2
-        sub rax, [fila_partida]
+        movzx rax, word[fila_destino]   ; calculo i filas
+        movzx rcx, word[columna_destino]   ;calculo j columnas
 
-        movzx rcx, word[columna_destino]   ;inicializo j columnas
+        imul rax, rax, 2
+        sub ax, [fila_partida]
+        mov [fila_destino], rax
+
         imul rcx, rcx, 2
-        sub rcx, [columna_partida]
+        sub cx, [columna_partida]
+        mov [columna_destino], rcx
 
         imul rax,7      ;i filas * cant columnas
         add  rax,rcx     ;(i filas * cant columnas) + j columnas
@@ -160,14 +160,80 @@ eliminar_soldado:
         mov byte[matriz + rax], bl ;marco la casilla de destino con el oficial
 
         dec byte[cantidad_soldados]
-        ;mov byte[comio?], 1 ;mas al pedo que bocina de avion
-        ;cambio de turno
+
+    cambio_turno_oficial:
         mov byte[turno], 0
+		mov byte[tiene_que_comer], 0
         ret
-    ;------------------------------------------------------------------
+;------------------------------------------------------------------SI EL OFICIAL NO CUMPLE CON SU DEBER
+
+   eliminar_oficial:
+        cmp byte[soldado_por_cumplir], 0
+        je eliminar_oficial1
+        cmp byte[soldado_por_cumplir], 1
+        je eliminar_oficial2
+        cmp byte[soldado_por_cumplir], 2
+        je eliminar_oficiales
+
+   eliminar_oficial1:
+        obtener_fila_columna posicion_oficial1, fila, columna
+
+       	movzx rax, word[fila]   ; inicializo i filas
+        movzx rcx, word[columna]   ;inicializo j columnas
+
+        imul rax,7      ;i filas * cant columnas
+        add  rax,rcx     ;(i filas * cant columnas) + j columnas
+        imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
+
+        mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
+        dec byte[cantidad_oficiales]
+      	jmp actualizar_posicion_oficial
+   eliminar_oficial2:
+        obtener_fila_columna posicion_oficial2, fila, columna
+
+       	movzx rax, word[fila]   ; inicializo i filas
+        movzx rcx, word[columna]   ;inicializo j columnas
+
+        imul rax,7      ;i filas * cant columnas
+        add  rax,rcx     ;(i filas * cant columnas) + j columnas
+        imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
+
+        mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
+        dec byte[cantidad_oficiales]
+      	jmp actualizar_posicion_oficial
+   eliminar_oficiales:
+        obtener_fila_columna posicion_oficial1, fila, columna
+
+       	movzx rax, word[fila]   ; inicializo i filas
+        movzx rcx, word[columna]   ;inicializo j columnas
+
+        imul rax,7      ;i filas * cant columnas
+        add  rax,rcx     ;(i filas * cant columnas) + j columnas
+        imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
+
+        mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
+        dec byte[cantidad_oficiales]
+
+        obtener_fila_columna posicion_oficial2, fila, columna
+
+       	movzx rax, word[fila]   ; inicializo i filas
+        movzx rcx, word[columna]   ;inicializo j columnas
+
+        imul rax,7      ;i filas * cant columnas
+        add  rax,rcx     ;(i filas * cant columnas) + j columnas
+        imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
+
+        mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
+        dec byte[cantidad_oficiales]
+      	jmp cambio_turno_oficial
+
+
+
+
+;------------------------------------------------------------------
 
     obtener_adyacencias:
-        cmp word[fila_partida],1
+        cmp word[fila],1
         jl ady_medio_izq
         ady_sup:
             mov al,byte[fila_partida]
@@ -222,62 +288,3 @@ eliminar_soldado:
         devolver_ady:
             ret
     ;------------------------------------------------------------------
-    calcular_distancia_entre_casillas: ;no se va a usar
-        mov byte[cumple_horizontal], 0
-        mov byte[cumple_vertical], 0
-        ; Calcular |x1 - x2|
-        mov ax, [columna_partida]
-        sub ax, [columna_destino]       ; ax = x1 - x2
-        cmp ax, 0
-        je vertical
-        bp_vertical:
-        jge no_neg_x        ; Si es positivo, saltar
-        neg ax             ; Convertir a positivo
-      no_neg_x:
-        mov bx, ax        ; Guardar |x1 - x2| en bx
-
-        ; Calcular |y1 - y2|
-        mov ax, [fila_partida]
-        sub ax, [fila_destino]       ; ax = y1 - y2
-        cmp ax, 0
-        je horizontal
-        bp_horizontal:
-        jge no_neg_y        ; Si es positivo, saltar
-        neg ax             ; Convertir a positivo
-      no_neg_y:
-        ; Comprobar si |x1 - x2| == |y1 - y2|
-        cmp bx, ax
-
-      calcular_distancia:
-        ; Dividir |x1 - x2| + |y1 - y2| entre 2 y redondear hacia arriba
-        add ax, bx        ; ax = |x1 - x2|
-        cmp ax, 1        ; Si es 1, no hay que redondear
-        je sin_redondeo
-        mov bx, 2                ; Divisor (base 2)
-        div bx                    ; Divide AX entre BX: AL = AX / BX (cociente), AH = AX % BX (residuo)
-
-        cmp dx,0         ; (residuo) en DX
-        je guardar_resultado     ; Si no hay residuo, almacenar resultado
-        inc ax             ; Si hay residuo, redondear hacia arriba
-
-      guardar_resultado:
-        movzx rax, ax   ; Guardar el resultado en rax : 0 si es un movimiento simple, 1 si es un movimiento doble
-        ret
-      sin_redondeo:
-        dec ax
-        movzx rax, ax   ; Guardar el resultado en rax : 0 si es un movimiento simple, 1 si es un movimiento doble
-        ret
-      no_diagonal:
-        cmp byte[cumple_horizontal], 1
-        je calcular_distancia
-        cmp byte[cumple_vertical], 1
-        je calcular_distancia
-      invalido:
-        movzx rax ,byte[3] ; 3 si no es un movimiento diagonal, horizontal, ni vertical válido
-        ret
-      horizontal:
-        mov byte[cumple_horizontal], 1
-        jmp bp_horizontal
-      vertical:
-        mov byte[cumple_vertical], 1
-        jmp bp_vertical

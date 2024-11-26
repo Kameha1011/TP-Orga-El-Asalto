@@ -8,17 +8,22 @@ section .data
     txt_error_ingreso_soldado db "Error en ingreso, la casilla ingresada no contiene un soldado",10,0
 section .bss
     buffer_casilla resw 1
+
     fila resw 1
     columna resw 1
+	fila_partida resw 1
+    columna_partida resw 1
+    fila_destino resw 1
+    columna_destino resw 1
+
+	oficial_1o2 resb 1
+	soldado_por_cumplir resb 1
 section .text
 ;------------------------------------------------------------------
 ;Verificar si la casilla ingresada contiene un soldado
 verificar_casilla_soldado:
     mov byte[valido], 1
-    mov rdi, casilla
-    sub rsp, 8
-    call obtener_fila_columna
-    add rsp, 8
+    obtener_fila_columna casilla, fila, columna
     sub rsp, 8
     call verificar_casilla_matriz
     add rsp, 8
@@ -43,10 +48,7 @@ verificar_casilla_soldado:
 ;Verificar si la casilla ingresada contiene un oficial
 verificar_casilla_oficial:
     mov byte[valido], 1
-    mov rdi, casilla
-    sub rsp, 8
-    call obtener_fila_columna
-    add rsp, 8
+    obtener_fila_columna casilla , fila, columna
     sub rsp, 8
     call verificar_casilla_matriz
     add rsp, 8
@@ -90,28 +92,6 @@ casilla_col_invalida:
     jg error_casilla
 
     ret
-;------------------------------------------------------------------
-;ingresar la casilla en rdi
-obtener_fila_columna:
-
-    ; Obtener casilla a formato entero
-    mov rsi, formato_numero
-    mov rdx, buffer_casilla
-    sub rsp, 8
-    call sscanf
-    add rsp, 8
-
-    mov ax, word[buffer_casilla]    ; Cargar el número completo (ej. 23) en AX
-    mov bx, 10                ; Divisor (base 10)
-    div bx                    ; Divide AX entre BX: AL = AX / BX (cociente), AH = AX % BX (residuo)
-
-    ; Guardar fila y columna
-    mov [fila], ax            ; Fila (cociente) en AX
-    mov [columna], dx         ; Columna (residuo) en DX
-
-    mov word[buffer_casilla], 0   ; Limpiar buffer
-
-    ret
 
 ;------------------------------------------------------------------
 ;ingresar la casilla en rdi
@@ -141,14 +121,7 @@ verificar_casilla_vacia:
 verificar_casilla_eliminar_soldado:
     mov byte[valido], 1
 
-    mov rdi, casilla_destino
-    sub rsp, 8
-    call obtener_fila_columna
-    add rsp, 8
-    mov dx, [fila]
-    mov [fila_destino], dx
-    mov dx, [columna]
-    mov [columna_destino], dx
+	obtener_fila_columna casilla_destino, fila_destino, columna_destino
 
     movzx rax, word[fila_destino]   ; inicializo i filas
     movzx rcx, word[columna_destino]   ;inicializo j columnas
@@ -196,11 +169,11 @@ recorrer_adyacencias_filas:
     imul rdx,rcx,2 ; i*tamanoElem
     mov ax,[buffer_casillas_ady + edx]; al = fila, ah = columna
 comparar_fila:
-    cmp al,[fila]
+    cmp al,[fila_destino]
     je comparar_columna
     jmp continuar_iteracion_adyacentes
 comparar_columna:
-    cmp ah,[columna]
+    cmp ah,[columna_destino]
     jne continuar_iteracion_adyacentes
     mov byte[valido],1
     jmp terminar_verificacion_ady
@@ -214,5 +187,15 @@ error_casilla_no_ady:
     call printf
     add rsp, 8
 terminar_verificacion_ady:
+    ret
+;------------------------------------------------------------------------------------
+verificar_que_oficial_soy:
+    movzx rax, byte[posicion_oficial1]
+    cmp [casilla_partida], rax
+	je soy_oficial1
+	mov byte[oficial_1o2], 0 ;caso oficial 2
+    ret
+  soy_oficial1:
+	mov byte[oficial_1o2], 1
     ret
 
