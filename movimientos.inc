@@ -261,7 +261,7 @@ eliminar_soldado:
 ;------------------------------------------------------------------
 
     obtener_adyacencias:; [sup, sup_i, sup_d, medio_i, medio_d, inf, inf_i, inf_d]
-        cmp word[fila],1
+        cmp word[fila_partida],1
         jl ady_medio_izq
         ady_sup:
             mov al,byte[fila_partida]
@@ -387,17 +387,17 @@ eliminar_soldado:
             
             ;celda siguiente a adyacente ady = (part + dest)/2 => dest = (2 * ady) - part => thanks agus
 
-            ;-------------
-            ;movzx ax,[rsi]
-            ;movzx bx,[rsi+1]
-            ;-------------  outdated => era para usar la casilla siguiente a la adyacente 
+            ;-------------  updated => casilla ady
             movzx ax,[rsi]
-            imul ax,2          
-            sub ax,[fila_partida]
-            
             movzx bx,[rsi+1]
-            imul bx,2
-            sub bx,[columna_partida]
+            ;-------------  outdated => era para usar la casilla siguiente a la adyacente 
+            ;movzx ax,[rsi]
+            ;imul ax,2          
+            ;sub ax,[fila_partida]
+            
+            ;movzx bx,[rsi+1]
+            ;imul bx,2
+            ;sub bx,[columna_partida]
             ;-------------
           
             ;traducir a desface
@@ -443,14 +443,14 @@ eliminar_soldado:
             
             mov al,[rsi]
             ;------------;outdated => era para usar la casilla siguiente a la adyacente 
-            add al,al          
-            sub al,byte[fila_partida]
+            ;add al,al          
+            ;sub al,byte[fila_partida]
             ;------------
 
             mov ah,[rsi+1]
             ;------------;outdated => era para usar la casilla siguiente a la adyacente 
-            add ah,ah
-            sub ah,byte[columna_partida]
+            ;add ah,ah
+            ;sub ah,byte[columna_partida]
             ;------------
             
             
