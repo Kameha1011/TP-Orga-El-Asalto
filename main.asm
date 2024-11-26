@@ -45,7 +45,6 @@ section .bss
 
 section .text
 main:
-
     sub rsp, 8
     call menu_principal
     add rsp, 8

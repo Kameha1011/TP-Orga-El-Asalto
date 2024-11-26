@@ -220,7 +220,7 @@ section .text
         call printf
         add rsp,8
 
-        mov rdi, txt_menu_orientacion_tablero ;"1-Arriba   |   2-Abajo   |   3-Izquierda   |   4-Derecha   | 5-Volver"
+        mov rdi, txt_menu_orientacion_tablero ;"1-Abajo(por defecto)   |   2-Arriba   |   3-Izquierda   |   4-Derecha   | 5-Volver"
         sub rsp,8
         call printf
         add rsp,8
@@ -230,13 +230,13 @@ section .text
         add rsp,8
 
         cmp byte[opcion],'1'
-        ;je orientacion_arriba
+        je orientacion_abajo
         cmp byte[opcion],'2'
-        ;je orientacion_abajo
+        je orientacion_arriba
         cmp byte[opcion],'3'
-        ;je orientacion_izquierda
+        je orientacion_izquierda
         cmp byte[opcion],'4'
-        ;je orientacion_derecha
+        je orientacion_derecha
         cmp byte[opcion],'5'
         je menu_personalizar_partida
 
@@ -295,7 +295,7 @@ section .text
     	call limpiar_pantalla
         add rsp, 8
     	sub rsp, 8
-		call imprimir_tablero
+		call elegir_orientacion
 	    add rsp,8
 
     	sub rsp, 8
@@ -328,7 +328,7 @@ section .text
         syscall
     fin_oficial:
         sub rsp, 8
-        call imprimir_tablero
+        call elegir_orientacion
         add rsp,8
         mov rdi, oficiales_insuficientes
         sub rsp, 8
@@ -340,7 +340,7 @@ section .text
         syscall
     fin_soldado:
         sub rsp, 8
-        call imprimir_tablero
+        call elegir_orientacion
         add rsp,8
         mov rdi, soldados_insuficientes
         sub rsp, 8
@@ -352,7 +352,7 @@ section .text
         syscall
     fin_fuerte:
         sub rsp, 8
-        call imprimir_tablero
+        call elegir_orientacion
         add rsp,8
         mov rdi, fuerte_tomado
         sub rsp, 8
