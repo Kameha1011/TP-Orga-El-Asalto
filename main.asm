@@ -34,16 +34,14 @@ section .data
     num_oficial db 79
     num_soldado db 88
 
-
-    soldados_en_fuerte db 0
-    cantidad_oficiales db 2
-    cantidad_soldados db 24
-
     vacio db 1
     sys_call dq 60
     exit_code dq 0
 section .bss
     casilla resb 2 ;casilla a la que se quiere mover el jugador
+    soldados_en_fuerte resb 1
+    cantidad_oficiales resb 1
+    cantidad_soldados resb 1
 
 section .text
 main:

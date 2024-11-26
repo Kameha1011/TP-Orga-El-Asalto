@@ -5,6 +5,13 @@ section .data
     formato_prueba db "casilla: %s ,fila: %hi ,columna: %hi",10,0
     txt_casilla_vacia db "La casilla ingresada no está vacía",10,0
     txt_casilla_no_ady db "La casilla ingresada no es adyacente (no puedes moverte mas de 1 casilla)",10,0
+
+    fila_inicial dd 5 ;columna inicial de la fortaleza
+    columna_inicial dd 3 ;columna inicial de la fortaleza
+    ancho_fortaleza dd 3;ancho de la fortaleza
+    largo_fortaleza dd 3 ;Largo de la fortaleza
+    total_elementos dd 49 ; cantidad total de elementos en la matriz
+
     txt_error_ingreso_soldado db "Error en ingreso, la casilla ingresada no contiene un soldado",10,0
 section .bss
     buffer_casilla resw 1
@@ -188,6 +195,84 @@ error_casilla_no_ady:
     add rsp, 8
 terminar_verificacion_ady:
     ret
+;------------------------------------------------------------------
+;Verificar las casillas del fuerte
+verificar_fuerte:
+    mov byte[soldados_en_fuerte], 0
+
+    call contar_piezas
+
+terminar_verificacion_fuerte:
+    ret
+
+contar_piezas:
+    mov ecx, 0 ; Contador de filas recorridas
+    mov esi, matriz
+    mov ebx, [fila_inicial]
+    dec ebx ; Ajustar índice de fila inicial a base 0
+
+fila_loop:
+    mov eax, ebx ; Copia el número de fila actual
+    imul eax, 7 ; Calcula el desplazamiento de la fila (7 columnas por fila)
+    add eax, [columna_inicial]
+    dec eax ; Ajustar índice de columna inicial a base 0
+    mov edi, eax ; Índice inicial de la fila actual
+
+    xor edx, edx ; Contador de columnas recorridas en la fila
+columna_loop:
+    mov al, [esi + edi]
+    cmp al, [num_soldado] ; Comparar valor actual con el valor buscado (88)
+    jne siguiente_columna
+
+    ; Incrementar contador si se encuentra un soldado
+    inc byte [soldados_en_fuerte]
+
+siguiente_columna:
+    inc edi ; Avanzar al siguiente elemento de la fila
+    inc edx ; Incrementar contador de columnas locales
+    cmp edx, [ancho_fortaleza]
+    jl columna_loop ; Continuar recorriendo la fila actual
+
+    ; Pasar a la siguiente fila
+    inc ebx
+    inc ecx
+    cmp ecx, [largo_fortaleza]
+    jl fila_loop ; Continuar recorriendo las filas
+
+    ret ; si se termina de iterar la ultima fila salgo de la funcion
+;------------------------------------------------------------------
+; contar Oficiales y Soldados
+verificar_oficiales_y_solados:
+    mov byte[cantidad_soldados], 0
+    mov byte[cantidad_oficiales], 0
+    mov ebx, 0           ; Índice para recorrer la matriz
+    mov ecx, [total_elementos] ; ECX tiene el total de elementos a recorrer
+    mov esi, matriz      ; ESI apunta al inicio de la matriz
+
+contar_casillas:
+    ; Verificamos el valor en la posición actual de la matriz
+    mov al, [esi + ebx]
+    cmp al, [num_soldado]; Comprobamos si es soldado
+    je incrementar_soldados
+    cmp al, [num_oficial]; Comprobamos si es oficial
+    je incrementar_oficiales
+
+siguiente_elemento:
+    ; Avanzamos al siguiente elemento
+    inc ebx
+    cmp ebx, ecx         ; Si ebx alcanza el total de elementos, terminamos el bucle
+    jl contar_casillas
+
+fin_conteo_oficiales_y_soldados:
+    ret
+
+incrementar_soldados:
+    inc byte [cantidad_soldados]
+    jmp siguiente_elemento
+
+incrementar_oficiales:
+    inc byte [cantidad_oficiales]
+    jmp siguiente_elemento
 ;------------------------------------------------------------------------------------
 verificar_que_oficial_soy:
     movzx rax, byte[posicion_oficial1]
@@ -198,4 +283,3 @@ verificar_que_oficial_soy:
   soy_oficial1:
 	mov byte[oficial_1o2], 1
     ret
-
