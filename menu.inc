@@ -13,20 +13,20 @@ section .data
     txt_menu_nueva_partida_opciones db "1-Personalizar partida   |   2-Empezar partida por defecto   |   3-Volver atras   |   4-Salir del juego",10,0
     txt_menu_personalizar_partida db "Personalizar partida - Modificar",10,0
     txt_menu_personalizar_partida_opciones db "1-Simbolo de soldados   |   2-Simbolo de oficiales   |   3-Orientacion de tablero(arriba por defecto)  ",10,"4-Quien empieza(soldados por defecto)   |   5-Comenzar   |   6-Volver atras   |   7-Salir del juego",10,0
-    txt_simbolo_soldados db "Ingrese el simbolo de los soldados: ",0
-    txt_simbolo_oficiales db "Ingrese el simbolo de los oficiales: ",0
-    txt_orientacion_tablero db "Elija la orientacion del tablero (arriba por defecto): ",0
+    txt_simbolo_soldados db "Ingrese el simbolo de los soldados: ",10,0
+    txt_simbolo_oficiales db "Ingrese el simbolo de los oficiales: ",10,0
+    txt_orientacion_tablero db "Elija la orientacion del tablero (arriba por defecto): ",10,0
     txt_menu_orientacion_tablero db "1-Arriba   |   2-Abajo   |   3-Izquierda   |   4-Derecha   | 5-Volver",10,0
-    txt_quien_empieza db "1-Empiezan los soldados   |   2-Empiezan los oficiales   | 3-Volver",0
+    txt_quien_empieza db "1-Empiezan los soldados   |   2-Empiezan los oficiales   | 3-Volver",10,0
 
 
 
     txt_menu_juego db "Menú de juego",10,0
 
     txt_turno_soldado db "1-Elige un soldado   |   2-Salir del juego",10,0
-    txt_mover_soldado db "1-Mover soldado      |   2-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas.
+    txt_mover_soldado db "1-Mover soldado      |   2-Volver atras   |   3-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas.
     txt_turno_oficial db "1-Elige un oficial   |   2-Salir del juego",10,0
-    txt_mover_oficial db "1-Mover oficial      |   2-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas. (ver el caso si se saltó una captura)
+    txt_mover_oficial db "1-Mover oficial      |   2-Volver atras   |   3-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas. (ver el caso si se saltó una captura)
     txt_salir_juego db "Saliendo ...",10,0
 
     txt_error_ingreso db "Error en ingreso",10,0
@@ -37,6 +37,8 @@ section .data
 
     ;saltar turno (preguntar a los profes) || opcion de rendirse en caso borde 1
 	formato_ingreso db "%s",0
+
+    orientacion_tablero db 1 ; 1 arriba, 2 abajo, 3 izquierda, 4 derecha
 
 section .bss
     opcion resb 1
@@ -111,7 +113,7 @@ section .text
         cmp byte[opcion],'1'
         je menu_personalizar_partida
         cmp byte[opcion],'2'
-        je juego
+        je partida_por_defecto
         cmp byte[opcion],'3'
         je menu_principal
         cmp byte[opcion],'4'
@@ -133,7 +135,7 @@ section .text
         call printf
         add rsp,8
 
-        mov rdi, txt_menu_personalizar_partida_opciones ;"1-Simbolo de soldados   |   2-Simbolo de oficiales   |   3-Orientacion de tablero(arriba por defecto)  ",10
+        mov rdi, txt_menu_personalizar_partida_opciones ;"1-Simbolo de soldados   |   2-Simbolo de oficiales   |   3-Orientacion de tablero(arriba por defecto)  "
                                                            ;"4-Quien empieza(soldados por defecto)   |   5-Comenzar   |   6-Volver atras   |   7-Salir del juego"
         sub rsp,8
         call printf
@@ -164,6 +166,15 @@ section .text
         jmp menu_personalizar_partida
 
 ;---------------------------------------------------------------------
+    partida_por_defecto:
+    	mov byte[simbolo_soldado],'X'
+    	mov byte[simbolo_oficial],'O'
+       	mov byte[orientacion_tablero],1
+    	mov byte[turno],1
+
+    	jmp juego
+
+;---------------------------------------------------------------------
     personalizar_simbolo_soldados:
         ;Imprimir 'Personalizar simbolo de soldados'
         mov rdi,txt_menu_principal    ;"Ingrese el simbolo de los soldados: "
@@ -172,11 +183,11 @@ section .text
         add rsp,8
 
         sub rsp,8
-        call leer_opcion
+        call leer_casilla
         add rsp,8
 
-        mov ax, [opcion]
-        mov [num_soldado], ax
+        mov ax, [casilla]
+        mov [simbolo_soldado], ax
 
         jmp menu_personalizar_partida
 
@@ -189,11 +200,11 @@ section .text
         add rsp,8
 
         sub rsp,8
-        call leer_opcion
+        call leer_casilla
         add rsp,8
 
-        mov ax, [opcion]
-        mov [num_oficial], ax
+        mov ax, [casilla]
+        mov [simbolo_oficial], ax
 
         jmp menu_personalizar_partida
 
@@ -209,7 +220,7 @@ section .text
         call printf
         add rsp,8
 
-        mov rdi, txt_menu_orientacion_tablero ;"1-Arriba   |   2-Abajo   |   3-Izquierda   |   4-Derecha   | 5-Volver"
+        mov rdi, txt_menu_orientacion_tablero ;"1-Abajo(por defecto)   |   2-Arriba   |   3-Izquierda   |   4-Derecha   | 5-Volver"
         sub rsp,8
         call printf
         add rsp,8
@@ -219,13 +230,13 @@ section .text
         add rsp,8
 
         cmp byte[opcion],'1'
-        ;je orientacion_arriba
+        je orientacion_abajo
         cmp byte[opcion],'2'
-        ;je orientacion_abajo
+        je orientacion_arriba
         cmp byte[opcion],'3'
-        ;je orientacion_izquierda
+        je orientacion_izquierda
         cmp byte[opcion],'4'
-        ;je orientacion_derecha
+        je orientacion_derecha
         cmp byte[opcion],'5'
         je menu_personalizar_partida
 
@@ -233,6 +244,19 @@ section .text
         call error_ingreso
 		add rsp,8
         jmp personalizar_orientacion_tablero
+
+      orientacion_arriba:
+        mov byte[orientacion_tablero],1
+        jmp menu_personalizar_partida
+   	  orientacion_abajo:
+        mov byte[orientacion_tablero],2
+        jmp menu_personalizar_partida
+      orientacion_izquierda:
+        mov byte[orientacion_tablero],3
+        jmp menu_personalizar_partida
+      orientacion_derecha:
+    	mov byte[orientacion_tablero],4
+        jmp menu_personalizar_partida
 ;----------------------------------------------------------------------
     quien_empieza:
         ;Imprimir 'Quien empieza'
@@ -266,11 +290,12 @@ section .text
 
 ;----------------------------------------------------------------------
     juego:
+
         sub rsp, 8
     	call limpiar_pantalla
         add rsp, 8
     	sub rsp, 8
-		call imprimir_tablero
+		call elegir_orientacion
 	    add rsp,8
 
     	sub rsp, 8
@@ -279,6 +304,15 @@ section .text
 
     	cmp rax,[sys_call]
         je fin
+
+        sub rsp, 8 
+        call verificar_fuerte
+        add rsp, 8
+
+        sub rsp, 8 
+        call verificar_oficiales_y_solados
+        add rsp, 8
+
         cmp byte[soldados_en_fuerte],9
         je fin_fuerte
         cmp byte[cantidad_soldados],8
@@ -294,7 +328,7 @@ section .text
         syscall
     fin_oficial:
         sub rsp, 8
-        call imprimir_tablero
+        call elegir_orientacion
         add rsp,8
         mov rdi, oficiales_insuficientes
         sub rsp, 8
@@ -306,7 +340,7 @@ section .text
         syscall
     fin_soldado:
         sub rsp, 8
-        call imprimir_tablero
+        call elegir_orientacion
         add rsp,8
         mov rdi, soldados_insuficientes
         sub rsp, 8
@@ -318,7 +352,7 @@ section .text
         syscall
     fin_fuerte:
         sub rsp, 8
-        call imprimir_tablero
+        call elegir_orientacion
         add rsp,8
         mov rdi, fuerte_tomado
         sub rsp, 8
@@ -389,18 +423,20 @@ section .text
     	call mover_soldado
     	add rsp,8
 
-    	cmp byte[opcion],"2"
+    	cmp byte[opcion],"3"
     	je salida
 
-        mov rdi, casilla_destino
-        sub rsp, 8
-        call obtener_fila_columna
-        add rsp, 8
+       	obtener_fila_columna casilla_destino, fila_destino, columna_destino
         sub rsp,8
         call verificar_casilla_destino_adyacente
         add rsp,8
     	cmp byte[valido],0
     	je pedir_casilla_destino_soldado
+
+    	mov ax, [fila_destino]
+        mov [fila],ax
+        mov ax, [columna_destino]
+        mov [columna],ax
        	sub rsp,8
     	call verificar_casilla_vacia
     	add rsp,8
@@ -415,7 +451,7 @@ section .text
 ;-----------------------------------------------------------------
 
 
-	mover_soldado: ;"1-Mover soldado      |   2-Salir del juego"
+	mover_soldado: ;"1-Mover soldado      |   2-Volver atras   |   3-Salir del juego"
         ;Imprimir 'Mover soldado'
         mov rdi, txt_mover_soldado
         sub rsp,8
@@ -429,6 +465,8 @@ section .text
         cmp byte[opcion],"1"
        	je leer_casilla
         cmp byte[opcion],"2"
+       	je txt_elegir_soldado
+        cmp byte[opcion],"3"
        	je salir_juego
 
 		sub rsp,8
@@ -469,32 +507,29 @@ section .text
 
     	cmp byte[valido],0
     	je casilla_invalida_oficial
+
         ;si es valido
+    	mov ax, [casilla]
+        mov [casilla_partida],ax
     	mov ax, [fila]
         mov [fila_partida],ax
         mov ax, [columna]
         mov [columna_partida],ax
+
 	pedir_casilla_destino_oficial:
 		sub rsp,8
 		call mover_oficial
 		add rsp,8
 
-		cmp byte[opcion],"2"
+		cmp byte[opcion],"3"
     	je salida
 
-        mov rdi, casilla_destino
-        sub rsp, 8
-        call obtener_fila_columna
-        add rsp, 8
+		obtener_fila_columna casilla_destino, fila_destino, columna_destino
         sub rsp,8
         call verificar_casilla_destino_adyacente
         add rsp,8
     	cmp byte[valido],0
     	je pedir_casilla_destino_oficial
-        
-		sub rsp,8
-		call verificar_casilla_vacia
-		add rsp,8
 
 		cmp byte[valido],1
 		je movimiento_oficial
@@ -504,7 +539,7 @@ section .text
 
 ;----------------------------------------------------------------
 
-    mover_oficial: ;"1-Mover oficial      |   2-Salir del juego"
+    mover_oficial: ;"1-Mover oficial      |   2-Volver atras   |   3-Salir del juego"
         ;Imprimir 'Mover oficial'
         mov rdi, txt_mover_oficial
         sub rsp,8
@@ -518,6 +553,8 @@ section .text
         cmp byte[opcion],"1"
        	je leer_casilla
         cmp byte[opcion],"2"
+       	je txt_elegir_oficial
+        cmp byte[opcion],"3"
        	je salir_juego
 
         sub rsp,8
