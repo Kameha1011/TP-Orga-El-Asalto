@@ -46,7 +46,7 @@ section .text
         ;mov byte[matriz + rax], 1 ;marco la casilla del soldado como vacia
 
        obtener_fila_columna casilla_destino, fila_destino, columna_destino
-
+        
         sub rsp,8
         call verificar_movimiento_soldado_valido
         add rsp,8
@@ -85,9 +85,14 @@ section .text
 
       ;verificar condiciones
         sub rsp,8
+        call verificar_movimiento_oficial_valido ;tiene_que_comer
+        add rsp,8
+
+        sub rsp,8
 		call verificar_casilla_eliminar_soldado
 		add rsp,8
         cmp byte[valido],1
+
         je comer_soldado
 
     solo_mover_oficial:
@@ -110,8 +115,8 @@ section .text
         imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
-        ;------------
-        sub rsp,8
+        ;------------ 
+        sub rsp,8 
         call activar_flag_quien_puede_comer
         add rsp,8
         mov byte[tiene_que_comer],0
@@ -137,7 +142,7 @@ section .text
 
 actualizar_posicion_oficial:
 	;ACTUALIZO LA POSICION DEL OFICIAL ELEGIDO
-        mov bl, [casilla_destino]
+        mov ax, [casilla_destino]
         ;chequear si mi casilla_partida pertenece a mi oficial1 o a mi oficial2
         sub rsp,8
         call verificar_que_oficial_soy
@@ -150,8 +155,8 @@ actualizar_posicion_oficial:
         mov [posicion_oficial1], ax
 
 	bp_eliminar_oficial:
-        cmp byte[tiene_que_comer], 1
-        je eliminar_oficial
+        cmp byte[oficial_por_cumplir], 0
+        jne eliminar_oficial
 
         jmp cambio_turno_oficial
 
@@ -228,7 +233,9 @@ eliminar_soldado:
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
         dec byte[cantidad_oficiales]
-      	jmp actualizar_posicion_oficial
+
+        mov word[posicion_oficial1],"00"
+      	jmp cambio_turno_oficial
    eliminar_oficial2:
         obtener_fila_columna posicion_oficial2, fila, columna
 
@@ -241,7 +248,9 @@ eliminar_soldado:
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
         dec byte[cantidad_oficiales]
-      	jmp actualizar_posicion_oficial
+
+        mov word[posicion_oficial2],"00"
+      	jmp cambio_turno_oficial
    eliminar_oficiales:
         obtener_fila_columna casilla_destino , fila, columna
 
@@ -254,9 +263,16 @@ eliminar_soldado:
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
         dec byte[cantidad_oficiales]
+        sub rsp,8
+        call verificar_que_oficial_soy
+        add rsp,8
+        cmp byte[oficial_1o2],1
+        je actualizar_oficial_1
+        mov word[posicion_oficial2],"00"
       	jmp cambio_turno_oficial
-
-
+        actualizar_oficial_1:
+            mov word[posicion_oficial1],"00"
+      	jmp cambio_turno_oficial
 
 
 ;------------------------------------------------------------------
@@ -317,7 +333,7 @@ eliminar_soldado:
         devolver_ady:
             ret
     ;------------------------------------------------------------------
-
+    
     obtener_dir_celda:;cargar fila en ax y columna en bx
         movzx rax, ax ; inicializo i filas
         movzx rbx, bx  ;inicializo j columnas
@@ -326,19 +342,19 @@ eliminar_soldado:
         add  rax,rbx     ;(i filas * cant columnas) + j columnas
         imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
-        ;add rax,qword[matriz]
+        ;add rax,qword[matriz] 
         ret ;devuelve en rax la direccion de la celda
     ;------------------------------------------------------------------
     obtener_dir_celdas:;rsi dir del buffer, rdi dir del nuevo buffer, rcx cantidad de celdas a traducir
-
+       
         traducir:
             movzx ax,[rsi]    ;fila
             movzx bx,[rsi+1]  ;columna
-
-            sub rsp,8
+            
+            sub rsp,8 
             call obtener_dir_celda ;traducir celda
             add rsp,8
-
+            
             mov [rdi],ax
 
             add rdi,2  ;dir siguiente celda nuevo buffer
@@ -351,7 +367,7 @@ eliminar_soldado:
 
     verificar_movimiento_oficial_valido: ;si podia comer y no lo hizo => RIP oficial
         mov r10, 0
-
+        mov byte[tiene_que_comer],0
         sub rsp,8
         call obtener_adyacencias
         add rsp,8
@@ -367,7 +383,7 @@ eliminar_soldado:
         mov rdi,buffer_casillas_ady_trad
         mov rcx,8
         checkear_celda:
-            mov bl,0
+            mov bl,0 
             movzx rax,word[rdi]
             cmp [matriz+rax],bl ;adyacencia estaria fuera de matriz
             je siguiente_loop
@@ -387,16 +403,27 @@ eliminar_soldado:
             ;-------------  updated => casilla ady
             movzx ax,[rsi]
             movzx bx,[rsi+1]
-            ;-------------  outdated => era para usar la casilla siguiente a la adyacente
+            ;-------------  outdated => era para usar la casilla siguiente a la adyacente 
             movzx ax,[rsi]
-            imul ax,2
+            imul ax,2          
             sub ax,[fila_partida]
+
+            cmp ax,0
+            jl siguiente_loop
+            cmp ax,6
+            jg siguiente_loop
 
             movzx bx,[rsi+1]
             imul bx,2
             sub bx,[columna_partida]
-            ;-------------
 
+            cmp bx,0
+            jl siguiente_loop
+            cmp bx,6
+            jg siguiente_loop
+
+
+          
             ;traducir a desface
             sub rsp,8
             call obtener_dir_celda
@@ -404,12 +431,12 @@ eliminar_soldado:
 
             ;checkear si esta vacia => habia un movimiento mejor
             mov bl,byte[vacio]
-            cmp [matriz+rax],bl
+            cmp [matriz+rax],bl 
             je puede_comer ; vacia=> puede comer esto, agregar a movimientos optimos para desp comparar con input
-
+            
             siguiente_loop:
             ;sigo con siguiente celda
-                add rsi,2
+                add rsi,2  
                 add rdi,2
                 dec rcx
                 cmp rcx,0
@@ -421,30 +448,58 @@ eliminar_soldado:
 
         puede_comer: ;podia "comer" un soldado y no lo hizo, agrego a "movimientos_optimos"
             mov byte[tiene_que_comer],1 ;por lo menos una que podia comer
-
+            
             mov al,[rsi]
-            ;------------;outdated => era para usar la casilla siguiente a la adyacente
-            ;add al,al
+            ;------------;outdated => era para usar la casilla siguiente a la adyacente 
+            ;add al,al          
             ;sub al,byte[fila_partida]
             ;------------
 
             mov ah,[rsi+1]
-            ;------------;outdated => era para usar la casilla siguiente a la adyacente
+            ;------------;outdated => era para usar la casilla siguiente a la adyacente 
             ;add ah,ah
             ;sub ah,byte[columna_partida]
             ;------------
+            
+            
 
-
-
-
+            
             mov [movimientos_optimos+r10],ax
             add r10,2
             jmp siguiente_loop
-
+        
 
     ;------------------------------------------------------------------
 
     verificar_movimiento_soldado_valido:
+        partida_en_fuerte:
+            sub rsp,8
+            mov ax,word[fila_partida]
+            mov word[fila],ax
+
+            mov ax,word[columna_partida]
+            mov word[columna],ax
+
+            call verificar_celda_en_fuerte
+            add rsp,8
+            cmp rax,1
+            je destino_en_fuerte
+            jne movimiento_fuera_fuerte
+        destino_en_fuerte:
+            sub rsp,8
+            mov ax,word[fila_destino]
+            mov word[fila],ax
+
+            mov ax,word[columna_destino]
+            mov word[columna],ax
+            call verificar_celda_en_fuerte
+            add rsp,8
+            cmp rax,1
+            je movimiento_dentro_fuerte
+            jne movimiento_fuera_fuerte
+        movimiento_dentro_fuerte:
+        ret
+        movimiento_fuera_fuerte:
 
         cmp byte[fila_destino],6
         jg movimiento_soldado_invalido
@@ -465,9 +520,9 @@ eliminar_soldado:
         validar_mov_horizontal:
 
             cmp byte[columna_partida],2
-            jle lado_izq
-            cmp byte[columna_partida],6
-            jge lado_der
+            jl lado_izq
+            cmp byte[columna_partida],4
+            jg lado_der
             jmp validar_mov_vertical_diagonal
             lado_izq:
                 mov al,[columna_partida]
@@ -484,7 +539,7 @@ eliminar_soldado:
             mov al,[fila_partida]
             cmp al,[fila_destino]
             jge movimiento_soldado_invalido
-
+            
         ret
         movimiento_soldado_invalido:
             mov byte[valido],0 ;0 invalido, 1 valido
@@ -492,7 +547,19 @@ eliminar_soldado:
             ;mov rsi, txt_movimiento_soldado_invalido
             ;call printf
             ;add rsp,8
-
+            
+        ret
+    verificar_celda_en_fuerte:      ;cargar en fila y columna. 0 no esta dentro.1 esta dentro.
+        cmp byte[fila],4
+        jl no_esta_en_fuerte
+        cmp byte[columna],2
+        jl no_esta_en_fuerte
+        cmp byte[columna],5
+        jg no_esta_en_fuerte
+        mov rax,1
+        ret
+        no_esta_en_fuerte:
+            mov rax,0
         ret
 
     activar_flag_quien_puede_comer:;1 si of_1 puede comer, 2 si of_2 puede_comer, 3 si ambos pueden comer
@@ -503,19 +570,20 @@ eliminar_soldado:
         add rsp,8
         mov al,[tiene_que_comer]
         mov [tiene_que_comer_1],al
-
+        mov byte[tiene_que_comer],0
         obtener_fila_columna posicion_oficial2,fila_partida,columna_partida
         sub rsp,8
         call verificar_movimiento_oficial_valido
         add rsp,8
         mov al,[tiene_que_comer]
         mov [tiene_que_comer_2],al
-
+        
         cmp al,[tiene_que_comer_1]
         jg activar_oficial_2
         jl activar_oficial_1
         cmp byte[tiene_que_comer_1],1
         je ambos_cumplen
+        mov byte[tiene_que_comer],0
         ret
         activar_oficial_1:
             mov byte[oficial_por_cumplir],1
@@ -536,7 +604,7 @@ eliminar_soldado:
                 mov al,[rdi]
                 cmp byte[fila_destino],al
                 jne siguiente_loop_comio_oficial
-
+            
             coincide_col:
                 mov ah,[rdi+1]
                 cmp byte[columna_destino],ah
@@ -549,8 +617,8 @@ eliminar_soldado:
         activar_flag_comio: ;podia comer y comio
             mov byte[tiene_que_comer],0
             ret
-
-
+            
+        
 
 
 

@@ -141,20 +141,18 @@ verificar_casilla_eliminar_soldado:
     movzx rbx, byte[num_soldado]
     movzx rcx, byte[matriz + rax]
     cmp rcx,rbx
-    jne error_casilla ;si la casilla no es un soldado -> invalido
+    jne bp_error_casilla ;si la casilla no es un soldado -> invalido
 
     ret ;si llega a este punto la casilla es válida
 
 ;------------------------------------------------------------------
 error_casilla:
-	cmp byte[tiene_que_comer], 0
-	je bp_error_casilla
     mov rdi, txt_error_ingreso_soldado
     sub rsp, 8
     call printf
     add rsp, 8
-    mov byte[valido], 0
 bp_error_casilla:
+    mov byte[valido], 0
     ret
 
 ;------------------------------------------------------------------
