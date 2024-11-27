@@ -1,5 +1,6 @@
 %include "movimientos.inc"
 %include "verificaciones.inc"
+%include "guardado_partida.inc"
 global menu_principal
 
 extern system
@@ -23,9 +24,9 @@ section .data
 
     txt_menu_juego db "Menú de juego",10,0
 
-    txt_turno_soldado db "1-Elige un soldado   |   2-Salir del juego",10,0
+    txt_turno_soldado db "1-Elige un soldado   |   2-Salir del juego   |   3-Guardar y Salir",10,0
     txt_mover_soldado db "1-Mover soldado      |   2-Volver atras   |   3-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas.
-    txt_turno_oficial db "1-Elige un oficial   |   2-Salir del juego",10,0
+    txt_turno_oficial db "1-Elige un oficial   |   2-Salir del juego   |   3-Guardar y Salir",10,0
     txt_mover_oficial db "1-Mover oficial      |   2-Volver atras   |   3-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas. (ver el caso si se saltó una captura)
     txt_salir_juego db "Saliendo ...",10,0
 
@@ -37,8 +38,6 @@ section .data
 
     ;saltar turno (preguntar a los profes) || opcion de rendirse en caso borde 1
 	formato_ingreso db "%s",0
-
-    orientacion_tablero db 1 ; 1 arriba, 2 abajo, 3 izquierda, 4 derecha
 
 section .bss
     opcion resb 1
@@ -64,7 +63,7 @@ section .text
         call leer_opcion
         add rsp,8
         cmp byte[opcion],'1'
-        je menu_continuar_partida
+        je continuar_partida
         cmp byte[opcion],'2'
         je menu_nueva_partida
         cmp byte[opcion],'3'
@@ -74,20 +73,6 @@ section .text
         call error_ingreso
 		add rsp,8
         jmp menu_principal
-
-;---------------------------------------------------------------------
-    menu_continuar_partida:
-    	sub rsp, 8
-    	call limpiar_pantalla
-        add rsp, 8
-
-        ;Imprimir 'Continuar partida' (no implementado) -> a revisar guardado de partidas, etc
-        mov rdi,txt_continuar_partida
-        sub rsp,8
-        call printf
-        add rsp,8
-
-        jmp menu_principal; esto solo porque no esta implementado
 
 ;----------------------------------------------------------------------
     menu_nueva_partida:
@@ -370,7 +355,7 @@ section .text
         sub rsp,8
         call printf
         add rsp,8
-
+    bifurcar_a_turno:
         ;Imprimir 'Elegir soldado' o 'Elegir oficial' depende del turno
         cmp byte[turno],0
         je txt_elegir_soldado
@@ -378,7 +363,7 @@ section .text
         je txt_elegir_oficial
 
 ;----------------------------------------------------------------
-    txt_elegir_soldado: ;"1-Elige un soldado  |   2-Salir del juego"
+    txt_elegir_soldado: ;"1-Elige un soldado  |   2-Salir del juego   |  3-Guardar y Salir" 
         mov rdi, txt_turno_soldado
         sub rsp,8
         call printf
@@ -392,6 +377,8 @@ section .text
        	je elegir_soldado
        	cmp byte[opcion],'2'
        	je salir_juego
+        cmp byte[opcion],"3"
+        je guardar_y_salir
 
     	sub rsp,8
         call error_ingreso
@@ -475,7 +462,7 @@ section .text
 		jmp txt_elegir_soldado
 ;----------------------------------------------------------------
 
-    txt_elegir_oficial: ;"1-Elige un oficial  |   2-Salir del juego"
+    txt_elegir_oficial: ;"1-Elige un oficial  |   2-Salir del juego   |  3-Guardar y Salir"
         mov rdi, txt_turno_oficial
         sub rsp,8
         call printf
@@ -489,6 +476,8 @@ section .text
        	je elegir_oficial
        	cmp byte[opcion],"2"
        	je salir_juego
+        cmp byte[opcion],"3"
+        je guardar_y_salir
 
         sub rsp,8
         call error_ingreso
@@ -618,7 +607,21 @@ section .text
         mov rax, [sys_call]
         ret
 ;----------------------------------------------------------------
-
+    continuar_partida:
+        sub rsp,8
+        call cargar_partida
+        add rsp,8
+        jmp juego
+;----------------------------------------------------------------
+    guardar_y_salir:
+        sub rsp,8
+        call guardar_partida
+        add rsp,8
+        sub rsp,8
+        call salir_juego
+        add rsp,8
+        ret
+;----------------------------------------------------------------
     error_ingreso:
         ;Imprimir 'Error en ingreso'
         mov rdi, txt_error_ingreso

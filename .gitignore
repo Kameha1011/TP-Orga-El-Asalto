@@ -3,3 +3,4 @@
 /object/*
 nasm_gcc.sh
 partidas.csv
+*.dat
