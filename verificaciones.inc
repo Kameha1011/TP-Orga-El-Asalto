@@ -25,7 +25,6 @@ section .bss
     columna_destino resw 1
 
 	oficial_1o2 resb 1
-	oficial_por_cumplir resb 1
 section .text
 ;------------------------------------------------------------------
 ;Verificar si la casilla ingresada contiene un soldado
@@ -147,11 +146,14 @@ verificar_casilla_eliminar_soldado:
 
 ;------------------------------------------------------------------
 error_casilla:
+	cmp byte[tiene_que_comer], 0
+	je bp_error_casilla
     mov rdi, txt_error_ingreso_soldado
     sub rsp, 8
     call printf
     add rsp, 8
     mov byte[valido], 0
+bp_error_casilla:
     ret
 
 ;------------------------------------------------------------------
@@ -276,8 +278,9 @@ incrementar_oficiales:
     jmp siguiente_elemento
 ;------------------------------------------------------------------------------------
 verificar_que_oficial_soy:
-    movzx rax, byte[posicion_oficial1]
-    cmp [casilla_partida], rax
+    mov bx, [posicion_oficial1]
+	mov cx, [casilla_partida]
+    cmp bx, cx
 	je soy_oficial1
 	mov byte[oficial_1o2], 0 ;caso oficial 2
     ret
