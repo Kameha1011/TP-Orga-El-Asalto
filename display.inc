@@ -1,8 +1,6 @@
 ; Todo lo relacionado a mostrar datos por pantalla
 ;extern matriz
 section .data
-    simbolo_soldado db "X",0
-    simbolo_oficial db "O",0
     soldado db " %s │",0
     oficial db " %s │",0
     casilla_vacia db "   │",0
