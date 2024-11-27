@@ -339,7 +339,7 @@ eliminar_soldado:
         imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
         ;add rax,qword[matriz] 
-        ret ;devuelve en rax la direccion de la celda
+        ret ;devuelve en rax el desface en bytes de la celda 
     ;------------------------------------------------------------------
     obtener_dir_celdas:;rsi dir del buffer, rdi dir del nuevo buffer, rcx cantidad de celdas a traducir
        
@@ -466,8 +466,36 @@ eliminar_soldado:
             ret
 
     ;------------------------------------------------------------------
-
+    
     verificar_movimiento_soldado_valido:
+        partida_en_fuerte:
+            sub rsp,8 
+            mov ax,word[fila_partida]
+            mov word[fila],ax
+
+            mov ax,word[columna_partida]
+            mov word[columna],ax
+            
+            call verificar_celda_en_fuerte
+            add rsp,8
+            cmp rax,1
+            je destino_en_fuerte
+            jne movimiento_fuera_fuerte
+        destino_en_fuerte:
+            sub rsp,8 
+            mov ax,word[fila_destino]
+            mov word[fila],ax
+
+            mov ax,word[columna_destino]
+            mov word[columna],ax
+            call verificar_celda_en_fuerte
+            add rsp,8
+            cmp rax,1
+            je movimiento_dentro_fuerte
+            jne movimiento_fuera_fuerte
+        movimiento_dentro_fuerte:
+        ret
+        movimiento_fuera_fuerte:
         
         cmp byte[fila_destino],6
         jg movimiento_soldado_invalido
@@ -518,9 +546,18 @@ eliminar_soldado:
             ;add rsp,8
             
         ret
-
-    
-
+    verificar_celda_en_fuerte:      ;cargar en fila y columna. 0 no esta dentro.1 esta dentro.
+        cmp byte[fila],4
+        jl no_esta_en_fuerte
+        cmp byte[columna],2
+        jl no_esta_en_fuerte
+        cmp byte[columna],5
+        jg no_esta_en_fuerte
+        mov rax,1
+        ret
+        no_esta_en_fuerte:
+            mov rax,0
+        ret
 
     activar_flag_quien_puede_comer:;1 si of_1 puede comer, 2 si of_2 puede_comer, 3 si ambos pueden comer
         mov byte[oficial_por_cumplir],0
