@@ -13,6 +13,7 @@ section .data
     total_elementos dd 49 ; cantidad total de elementos en la matriz
 
     txt_error_ingreso_soldado db "Error en ingreso, la casilla ingresada no contiene un soldado",10,0
+    txt_movimiento_soldado_invalido db "El movimiento es invalido. Recuerda que los soldados deben moverse hacia la fortaleza.",10,0
 section .bss
     buffer_casilla resw 1
 
@@ -24,6 +25,7 @@ section .bss
     columna_destino resw 1
 
 	oficial_1o2 resb 1
+	oficial_por_cumplir resb 1
 section .text
 ;------------------------------------------------------------------
 ;Verificar si la casilla ingresada contiene un soldado
