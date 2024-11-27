@@ -229,6 +229,8 @@ eliminar_soldado:
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
         dec byte[cantidad_oficiales]
+
+        mov word[posicion_oficial1],"00"
       	jmp cambio_turno_oficial
    eliminar_oficial2:
         obtener_fila_columna posicion_oficial2, fila, columna
@@ -242,6 +244,8 @@ eliminar_soldado:
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
         dec byte[cantidad_oficiales]
+
+        mov word[posicion_oficial2],"00"
       	jmp cambio_turno_oficial
    eliminar_oficiales:
         obtener_fila_columna casilla_destino , fila, columna
@@ -255,6 +259,15 @@ eliminar_soldado:
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
         dec byte[cantidad_oficiales]
+        sub rsp,8
+        call verificar_que_oficial_soy
+        add rsp,8
+        cmp byte[oficial_1o2],1
+        je actualizar_oficial_1
+        mov word[posicion_oficial2],"00"
+      	jmp cambio_turno_oficial
+        actualizar_oficial_1:
+            mov word[posicion_oficial1],"00"
       	jmp cambio_turno_oficial
 
 
