@@ -83,13 +83,13 @@ section .text
 
       ;verificar condiciones
         sub rsp,8
+        call verificar_movimiento_oficial_valido ;tiene_que_comer
+        add rsp,8
+        
+        sub rsp,8
 		call verificar_casilla_eliminar_soldado
 		add rsp,8
         cmp byte[valido],1
-
-        sub rsp,8
-        call verificar_movimiento_oficial_valido
-        add rsp,8
 
         je comer_soldado
 
@@ -214,7 +214,7 @@ eliminar_soldado:
         je eliminar_oficial2
         cmp byte[oficial_por_cumplir], 3
         je eliminar_oficiales
-
+        ret
    eliminar_oficial1:
         obtener_fila_columna posicion_oficial1, fila, columna
 
@@ -362,7 +362,7 @@ eliminar_soldado:
 
     verificar_movimiento_oficial_valido: ;si podia comer y no lo hizo => RIP oficial
         mov r10, 0
-
+        mov byte[tiene_que_comer],0
         sub rsp,8
         call obtener_adyacencias
         add rsp,8
@@ -395,18 +395,29 @@ eliminar_soldado:
             je siguiente_loop
             ;celda siguiente a adyacente ady = (part + dest)/2 => dest = (2 * ady) - part => thanks agus
 
-            ;-------------  updated => casilla ady
+           
             movzx ax,[rsi]
             movzx bx,[rsi+1]
-            ;-------------  outdated => era para usar la casilla siguiente a la adyacente 
+            
             movzx ax,[rsi]
             imul ax,2          
             sub ax,[fila_partida]
             
+            cmp ax,0
+            jl siguiente_loop
+            cmp ax,6
+            jg siguiente_loop
+
             movzx bx,[rsi+1]
             imul bx,2
             sub bx,[columna_partida]
-            ;-------------
+
+            cmp bx,0
+            jl siguiente_loop
+            cmp bx,6
+            jg siguiente_loop
+
+
           
             ;traducir a desface
             sub rsp,8
@@ -451,7 +462,7 @@ eliminar_soldado:
             mov [movimientos_optimos+r10],ax
             add r10,2
             jmp siguiente_loop
-        
+            ret
 
     ;------------------------------------------------------------------
 
@@ -527,6 +538,7 @@ eliminar_soldado:
         jl activar_oficial_1
         cmp byte[tiene_que_comer_1],1
         je ambos_cumplen
+        mov byte[tiene_que_comer],0
         ret
         activar_oficial_1:
             mov byte[oficial_por_cumplir],1
