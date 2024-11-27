@@ -14,13 +14,14 @@ global movimientos
 
 section .data
     tiene_que_comer db 1
+
 section .bss
 
 
     buffer_casillas_ady resw 8
     buffer_casilla_ady resw 1
 
-
+	oficial_por_cumplir resb 1
 section .text
     movimientos:
         ret
@@ -95,22 +96,23 @@ section .text
         mov bl, [num_oficial]
         mov byte[matriz + rax], bl ;marco la casilla de destino con el oficial
 
-        cmp byte[tiene_que_comer], 1
-        je eliminar_oficial
-
 actualizar_posicion_oficial:
 	;ACTUALIZO LA POSICION DEL OFICIAL ELEGIDO
-        mov bl, [casilla_destino]
+        mov ax, [casilla_destino]
         ;chequear si mi casilla_partida pertenece a mi oficial1 o a mi oficial2
         sub rsp,8
         call verificar_que_oficial_soy
         add rsp,8
         cmp byte[oficial_1o2], 1
         je oficial1
-        mov byte[posicion_oficial2], bl
-        jmp cambio_turno_oficial
+        mov [posicion_oficial2], ax
+        jmp bp_eliminar_oficial
         oficial1:
-        mov byte[posicion_oficial1], bl
+        mov [posicion_oficial1], ax
+
+	bp_eliminar_oficial:
+        cmp byte[tiene_que_comer], 1
+        je eliminar_oficial
 
         jmp cambio_turno_oficial
 
@@ -168,11 +170,11 @@ eliminar_soldado:
 ;------------------------------------------------------------------SI EL OFICIAL NO CUMPLE CON SU DEBER
 
    eliminar_oficial:
-        cmp byte[soldado_por_cumplir], 0
+        cmp byte[oficial_por_cumplir], 1
         je eliminar_oficial1
-        cmp byte[soldado_por_cumplir], 1
+        cmp byte[oficial_por_cumplir], 2
         je eliminar_oficial2
-        cmp byte[soldado_por_cumplir], 2
+        cmp byte[oficial_por_cumplir], 3
         je eliminar_oficiales
 
    eliminar_oficial1:
@@ -187,7 +189,7 @@ eliminar_soldado:
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
         dec byte[cantidad_oficiales]
-      	jmp actualizar_posicion_oficial
+      	jmp cambio_turno_oficial
    eliminar_oficial2:
         obtener_fila_columna posicion_oficial2, fila, columna
 
@@ -200,21 +202,9 @@ eliminar_soldado:
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
         dec byte[cantidad_oficiales]
-      	jmp actualizar_posicion_oficial
+      	jmp cambio_turno_oficial
    eliminar_oficiales:
-        obtener_fila_columna posicion_oficial1, fila, columna
-
-       	movzx rax, word[fila]   ; inicializo i filas
-        movzx rcx, word[columna]   ;inicializo j columnas
-
-        imul rax,7      ;i filas * cant columnas
-        add  rax,rcx     ;(i filas * cant columnas) + j columnas
-        imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
-
-        mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
-        dec byte[cantidad_oficiales]
-
-        obtener_fila_columna posicion_oficial2, fila, columna
+        obtener_fila_columna casilla_destino , fila, columna
 
        	movzx rax, word[fila]   ; inicializo i filas
         movzx rcx, word[columna]   ;inicializo j columnas
@@ -226,8 +216,6 @@ eliminar_soldado:
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
         dec byte[cantidad_oficiales]
       	jmp cambio_turno_oficial
-
-
 
 
 ;------------------------------------------------------------------
