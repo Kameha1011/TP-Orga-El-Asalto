@@ -121,7 +121,7 @@ section .text
         mov byte[tiene_que_comer],0
         obtener_fila_columna casilla_partida,fila_partida,columna_partida
         sub rsp,8
-        call verificar_movimiento_oficial_valido
+        call verificar_movimiento_oficial_valido ; tiene_que_comer
         add rsp,8
         ;------------
 
@@ -151,8 +151,8 @@ actualizar_posicion_oficial:
         mov [posicion_oficial1], ax
 
 	bp_eliminar_oficial:
-        cmp byte[tiene_que_comer], 1
-        je eliminar_oficial
+        cmp byte[oficial_por_cumplir], 0
+        jne eliminar_oficial
 
         jmp cambio_turno_oficial
 
@@ -487,10 +487,11 @@ eliminar_soldado:
 
         validar_mov_horizontal:
 
+
             cmp byte[columna_partida],2
-            jle lado_izq
-            cmp byte[columna_partida],6
-            jge lado_der
+            jl lado_izq
+            cmp byte[columna_partida],4
+            jg lado_der
             jmp validar_mov_vertical_diagonal
             lado_izq:
                 mov al,[columna_partida]
@@ -518,6 +519,9 @@ eliminar_soldado:
             
         ret
 
+    
+
+
     activar_flag_quien_puede_comer:;1 si of_1 puede comer, 2 si of_2 puede_comer, 3 si ambos pueden comer
         mov byte[oficial_por_cumplir],0
         obtener_fila_columna posicion_oficial1,fila_partida,columna_partida
@@ -526,7 +530,7 @@ eliminar_soldado:
         add rsp,8
         mov al,[tiene_que_comer]
         mov [tiene_que_comer_1],al
-
+        mov byte[tiene_que_comer],0
         obtener_fila_columna posicion_oficial2,fila_partida,columna_partida
         sub rsp,8
         call verificar_movimiento_oficial_valido
