@@ -25,7 +25,7 @@ section .bss
     columna_destino resw 1
 
 	oficial_1o2 resb 1
-	soldado_por_cumplir resb 1
+	oficial_por_cumplir resb 1
 section .text
 ;------------------------------------------------------------------
 ;Verificar si la casilla ingresada contiene un soldado

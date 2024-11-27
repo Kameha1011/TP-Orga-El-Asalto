@@ -14,6 +14,8 @@ global movimientos
 
 section .data
     tiene_que_comer db 1
+    tiene_que_comer_1 db 1
+    tiene_que_comer_2 db 1
 section .bss
 
 
@@ -84,6 +86,11 @@ section .text
 		call verificar_casilla_eliminar_soldado
 		add rsp,8
         cmp byte[valido],1
+
+        sub rsp,8
+        call verificar_movimiento_oficial_valido
+        add rsp,8
+
         je comer_soldado
 
     solo_mover_oficial:
@@ -106,11 +113,16 @@ section .text
         imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
-        
+        ;------------ 
+        sub rsp,8 
+        call activar_flag_quien_puede_comer
+        add rsp,8
         mov byte[tiene_que_comer],0
+        obtener_fila_columna casilla_partida,fila_partida,columna_partida
         sub rsp,8
         call verificar_movimiento_oficial_valido
         add rsp,8
+        ;------------
 
 
         movzx rax, word[fila_destino]   ; inicializo i filas
@@ -196,11 +208,11 @@ eliminar_soldado:
 ;------------------------------------------------------------------SI EL OFICIAL NO CUMPLE CON SU DEBER
 
    eliminar_oficial:
-        cmp byte[soldado_por_cumplir], 0
+        cmp byte[oficial_por_cumplir], 1
         je eliminar_oficial1
-        cmp byte[soldado_por_cumplir], 1
+        cmp byte[oficial_por_cumplir], 2
         je eliminar_oficial2
-        cmp byte[soldado_por_cumplir], 2
+        cmp byte[oficial_por_cumplir], 3
         je eliminar_oficiales
 
    eliminar_oficial1:
@@ -366,7 +378,6 @@ eliminar_soldado:
         mov rdi,buffer_casillas_ady_trad
         mov rcx,8
         checkear_celda:
-            
             mov bl,0 
             movzx rax,word[rdi]
             cmp [matriz+rax],bl ;adyacencia estaria fuera de matriz
@@ -382,22 +393,19 @@ eliminar_soldado:
             movzx rax,word[rdi]
             cmp [matriz+rax],bl ;hay un oficial
             je siguiente_loop
-
-            
-            
             ;celda siguiente a adyacente ady = (part + dest)/2 => dest = (2 * ady) - part => thanks agus
 
             ;-------------  updated => casilla ady
             movzx ax,[rsi]
             movzx bx,[rsi+1]
             ;-------------  outdated => era para usar la casilla siguiente a la adyacente 
-            ;movzx ax,[rsi]
-            ;imul ax,2          
-            ;sub ax,[fila_partida]
+            movzx ax,[rsi]
+            imul ax,2          
+            sub ax,[fila_partida]
             
-            ;movzx bx,[rsi+1]
-            ;imul bx,2
-            ;sub bx,[columna_partida]
+            movzx bx,[rsi+1]
+            imul bx,2
+            sub bx,[columna_partida]
             ;-------------
           
             ;traducir a desface
@@ -414,29 +422,13 @@ eliminar_soldado:
             ;sigo con siguiente celda
                 add rsi,2  
                 add rdi,2
-                loop checkear_celda
+                dec rcx
+                cmp rcx,0
+                je optimos_completados
+                jmp checkear_celda
         ;si llega aca => ya tengo todos los optimos
-        mov rcx,8
-        mov rdi,movimientos_optimos
-        loop_activar_flag_comio:
-            coincide_fila:
-                mov al,[rdi]
-                cmp byte[fila_destino],al
-                jne siguiente_loop_comio_oficial
-            
-            coincide_col:
-                mov ah,[rdi+1]
-                cmp byte[columna_destino],ah
-                je activar_flag_comio
-            siguiente_loop_comio_oficial:
-                add rdi,2
-                loop loop_activar_flag_comio
-
-
+        optimos_completados:
         ret
-
-        activar_flag_comio: ;podia comer y comio
-            mov byte[tiene_que_comer],0
 
         puede_comer: ;podia "comer" un soldado y no lo hizo, agrego a "movimientos_optimos"
             mov byte[tiene_que_comer],1 ;por lo menos una que podia comer
@@ -514,6 +506,60 @@ eliminar_soldado:
             
         ret
 
+    activar_flag_quien_puede_comer:;1 si of_1 puede comer, 2 si of_2 puede_comer, 3 si ambos pueden comer
+        mov byte[oficial_por_cumplir],0
+        obtener_fila_columna posicion_oficial1,fila_partida,columna_partida
+        sub rsp,8
+        call verificar_movimiento_oficial_valido
+        add rsp,8
+        mov al,[tiene_que_comer]
+        mov [tiene_que_comer_1],al
+
+        obtener_fila_columna posicion_oficial2,fila_partida,columna_partida
+        sub rsp,8
+        call verificar_movimiento_oficial_valido
+        add rsp,8
+        mov al,[tiene_que_comer]
+        mov [tiene_que_comer_2],al
+        
+        cmp al,[tiene_que_comer_1]
+        jg activar_oficial_2
+        jl activar_oficial_1
+        cmp byte[tiene_que_comer_1],1
+        je ambos_cumplen
+        ret
+        activar_oficial_1:
+            mov byte[oficial_por_cumplir],1
+        ret
+        activar_oficial_2:
+            mov byte[oficial_por_cumplir],2
+        ret
+        ambos_cumplen:
+            mov byte[oficial_por_cumplir],3
+        ret
+
+
+    verificar_oficial_comio: ;obsoleto pero puede servir
+        mov rcx,8
+        mov rdi,movimientos_optimos
+        loop_activar_flag_comio:
+            coincide_fila:
+                mov al,[rdi]
+                cmp byte[fila_destino],al
+                jne siguiente_loop_comio_oficial
+            
+            coincide_col:
+                mov ah,[rdi+1]
+                cmp byte[columna_destino],ah
+                je activar_flag_comio
+            siguiente_loop_comio_oficial:
+                add rdi,2
+                loop loop_activar_flag_comio
+        ret
+
+        activar_flag_comio: ;podia comer y comio
+            mov byte[tiene_que_comer],0
+            ret
             
         
 
