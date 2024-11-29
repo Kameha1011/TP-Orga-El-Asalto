@@ -22,6 +22,9 @@ section .data
     separador_horizontal         db " ├───┼───┼───┼───┼───┼───┼───┤",10,0
     separador_horizontal_arriba       db " └───┴───┼───┼───┼───┼───┴───┘",10,0
     separador_horizontal_final   db "         └───┴───┴───┘        ",10,0
+    bg_negro db 0x1B, '[', '4', '4', 'm', 0
+    color_reset db 0x1B, '[', '0', 'm', 0
+    flag_fuerte db 0 ; 0 si no esta en fuerte, 1 si esta en fuerte
 section .bss
 section .text
 global imprimir_tablero_rotado_arriba
@@ -74,9 +77,23 @@ recorrer_columnas:
     ;inicializamos (j-1)*longitudElemento 
     mov r15d, [longitudElemento] ; Longitud de un elemento
     imul r15d, r14d; j * longitudElemento
+    cmp r12d,4
+    jl continuar_imprimir
+    cmp r14d,1
+    jle continuar_imprimir
+    cmp r14d,5
+    jge continuar_imprimir
+setear_flag_fuerte:
+    mov byte[flag_fuerte],1
+continuar_imprimir:
     sub rsp,8
     call imprimir_casilla
     add rsp,8
+    mov rdi, color_reset
+    sub rsp,8
+    call printf
+    add rsp,8
+    mov byte[flag_fuerte],0
     ;Incremento j y si j<columnas contiuo iterando por columnas
     inc r14d
     cmp r14d, [columnas]
@@ -482,6 +499,19 @@ imprimir_salto_de_linea:
     ret
 
 imprimir_casilla:
+    cmp byte[flag_fuerte],0
+    je setear_bg_transparente
+    mov rdi, bg_negro
+    sub rsp,8
+    call printf
+    add rsp,8
+    jmp continuar_a_imprimir
+setear_bg_transparente:
+    mov rdi, color_reset
+    sub rsp,8
+    call printf
+    add rsp,8
+continuar_a_imprimir:
     cmp byte[matriz + r13 + r15], 1 ; si matriz[i][j] > 1 -> hay alguna pieza
     jg imprimir_casilla_ocupada
     cmp byte[matriz + r13 + r15], 1 ; si matriz[i][j] == 1 -> es casilla vacia
@@ -544,6 +574,20 @@ imprimir_indice_fila:
 
 imprimir_espacio_en_blanco:
     mov rdi, espacio_en_blanco
+    sub rsp,8
+    call printf
+    add rsp,8
+    ret
+
+set_bg_negro:
+    mov rdi,bg_negro
+    sub rsp,8
+    call printf
+    add rsp,8
+    ret
+
+reset_color:
+    mov rdi,color_reset
     sub rsp,8
     call printf
     add rsp,8
