@@ -285,7 +285,7 @@ section .text
     	sub rsp, 8
         call empezar_juego
         add rsp, 8
-
+    verificaciones_final:
     	cmp rax,[sys_call]
         je fin
 
@@ -500,10 +500,8 @@ section .text
         mov [columna_partida],ax
 
 	pedir_casilla_destino_oficial:
-		sub rsp,8
-		call mover_oficial
-		add rsp,8
-
+		jmp mover_oficial
+    continuar_a_verificar_destino_oficial:
 		cmp byte[opcion],"3"
     	je salida
 
@@ -534,7 +532,7 @@ section .text
         add rsp,8
 
         cmp byte[opcion],"1"
-       	je leer_casilla
+       	je ingreso_casilla_dest_oficial
         cmp byte[opcion],"2"
        	je txt_elegir_oficial
         cmp byte[opcion],"3"
@@ -544,6 +542,11 @@ section .text
         call error_ingreso
 		add rsp,8
 		jmp txt_elegir_oficial
+    ingreso_casilla_dest_oficial:
+        sub rsp,8
+        call leer_casilla
+        add rsp,8
+        jmp continuar_a_verificar_destino_oficial
 ;----------------------------------------------------------------
  	leer_opcion:
     ;Imprimir 'Ingrese la opcion: '
