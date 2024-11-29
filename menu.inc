@@ -402,10 +402,8 @@ section .text
         mov [columna_partida],ax
 
 	pedir_casilla_destino_soldado:
-        sub rsp,8
-    	call mover_soldado
-    	add rsp,8
-
+        jmp mover_soldado
+  continuar_a_verificar_destino_soldado:
     	cmp byte[opcion],"3"
     	je salida
 
@@ -444,7 +442,7 @@ section .text
 		add rsp,8
 
         cmp byte[opcion],"1"
-       	je leer_casilla
+       	je ingreso_casilla_dest_soldado
         cmp byte[opcion],"2"
        	je txt_elegir_soldado
         cmp byte[opcion],"3"
@@ -454,6 +452,11 @@ section .text
 		call error_ingreso
 		add rsp,8
 		jmp txt_elegir_soldado
+        ingreso_casilla_dest_soldado:
+        sub rsp,8
+        call leer_casilla
+        add rsp,8
+        jmp continuar_a_verificar_destino_soldado
 ;----------------------------------------------------------------
 
     txt_elegir_oficial: ;"1-Elige un oficial  |   2-Salir del juego   |  3-Guardar y Salir"
