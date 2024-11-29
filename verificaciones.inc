@@ -13,6 +13,7 @@ section .data
     total_elementos dd 49 ; cantidad total de elementos en la matriz
 
     txt_error_ingreso_soldado db "Error en ingreso, la casilla ingresada no contiene un soldado",10,0
+    txt_movimiento_soldado_invalido db "El movimiento es invalido. Recuerda que los soldados deben moverse hacia la fortaleza.",10,0
 section .bss
     buffer_casilla resw 1
 
@@ -24,7 +25,7 @@ section .bss
     columna_destino resw 1
 
 	oficial_1o2 resb 1
-	soldado_por_cumplir resb 1
+	oficial_por_cumplir resb 1
 section .text
 ;------------------------------------------------------------------
 ;Verificar si la casilla ingresada contiene un soldado
@@ -140,7 +141,7 @@ verificar_casilla_eliminar_soldado:
     movzx rbx, byte[num_soldado]
     movzx rcx, byte[matriz + rax]
     cmp rcx,rbx
-    jne error_casilla ;si la casilla no es un soldado -> invalido
+    jne bp_error_casilla ;si la casilla no es un soldado -> invalido
 
     ret ;si llega a este punto la casilla es válida
 
@@ -150,6 +151,7 @@ error_casilla:
     sub rsp, 8
     call printf
     add rsp, 8
+bp_error_casilla:
     mov byte[valido], 0
     ret
 
@@ -275,8 +277,9 @@ incrementar_oficiales:
     jmp siguiente_elemento
 ;------------------------------------------------------------------------------------
 verificar_que_oficial_soy:
-    movzx rax, byte[posicion_oficial1]
-    cmp [casilla_partida], rax
+    mov bx, [posicion_oficial1]
+	mov cx, [casilla_partida]
+    cmp bx, cx
 	je soy_oficial1
 	mov byte[oficial_1o2], 0 ;caso oficial 2
     ret

@@ -33,10 +33,9 @@ section .data
     txt_error_ingreso db "Error en ingreso",10,0
     txt_casilla_invalida db "Casilla inválida",10,0
 
-    txt_casilla db "Ingrese la casilla (XX): ",0
-    txt_opcion db "Ingrese la opción: ",0
+    txt_casilla db "Ingrese la casilla (XX) - Solo toma los 2 primeros digitos : ",0
+    txt_opcion db "Ingrese la opción - Solo toma el primer digito: ",0
 
-    ;saltar turno (preguntar a los profes) || opcion de rendirse en caso borde 1
 	formato_ingreso db "%s",0
 
 section .bss
@@ -294,9 +293,6 @@ section .text
         call verificar_fuerte
         add rsp, 8
 
-        sub rsp, 8 
-        call verificar_oficiales_y_solados
-        add rsp, 8
 
         cmp byte[soldados_en_fuerte],9
         je fin_fuerte
@@ -419,15 +415,13 @@ section .text
         add rsp,8
     	cmp byte[valido],0
     	je pedir_casilla_destino_soldado
-
-    	mov ax, [fila_destino]
-        mov [fila],ax
-        mov ax, [columna_destino]
-        mov [columna],ax
-       	sub rsp,8
+    	obtener_fila_columna casilla_destino, fila, columna
+		sub rsp,8
     	call verificar_casilla_vacia
-    	add rsp,8
+        add rsp,8
+		cmp byte[valido],0
 
+    	je pedir_casilla_destino_soldado
       	cmp byte[valido],1
 		je movimiento_soldado
     	cmp byte[valido],0
@@ -565,7 +559,7 @@ section .text
         add rsp,8
         mov bh, [buffer]
         mov [opcion], bh
-
+		mov [buffer],'' ;limpio buffer
         cmp rax, 1
         jl error_scan
     	ret
@@ -589,6 +583,7 @@ section .text
         mov bx, [buffer]
         mov [casilla], bx
         mov [casilla_destino], bx
+        mov [buffer],'' ;limpio buffer
 
         cmp rax, 1
         jl error_scan_casilla
