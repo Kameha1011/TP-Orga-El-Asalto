@@ -559,7 +559,7 @@ section .text
         add rsp,8
         mov bh, [buffer]
         mov [opcion], bh
-		mov [buffer],'' ;limpio buffer
+		mov byte[buffer],'' ;limpio buffer
         cmp rax, 1
         jl error_scan
     	ret
@@ -583,7 +583,7 @@ section .text
         mov bx, [buffer]
         mov [casilla], bx
         mov [casilla_destino], bx
-        mov [buffer],'' ;limpio buffer
+        mov byte[buffer],'' ;limpio buffer
 
         cmp rax, 1
         jl error_scan_casilla
