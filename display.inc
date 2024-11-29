@@ -22,7 +22,7 @@ section .data
     separador_horizontal         db " ├───┼───┼───┼───┼───┼───┼───┤",10,0
     separador_horizontal_arriba       db " └───┴───┼───┼───┼───┼───┴───┘",10,0
     separador_horizontal_final   db "         └───┴───┴───┘        ",10,0
-    bg_negro db 0x1B, '[', '4', '4', 'm', 0
+    bg_negro db 0x1B, '[','0', '1', '0', '5','m', 0
     color_reset db 0x1B, '[', '0', 'm', 0
     flag_fuerte db 0 ; 0 si no esta en fuerte, 1 si esta en fuerte
 section .bss
@@ -189,9 +189,23 @@ recorrer_columnas_2:
     ;inicializamos (j-1)*longitudElemento 
     mov r15d, [longitudElemento] ; Longitud de un elemento
     imul r15d, r14d; j * longitudElemento
+    cmp r12d,4
+    jl continuar_imprimir_2
+    cmp r14d,1
+    jle continuar_imprimir_2
+    cmp r14d,5
+    jge continuar_imprimir_2
+setear_flag_fuerte_2:
+    mov byte[flag_fuerte],1
+continuar_imprimir_2:
     sub rsp,8
     call imprimir_casilla
     add rsp,8
+    mov rdi, color_reset
+    sub rsp,8
+    call printf
+    add rsp,8
+    mov byte[flag_fuerte],0
     ;Incremento j y si j<columnas contiuo iterando por columnas
     dec r14d
     cmp r14d, 0
@@ -299,9 +313,23 @@ recorrer_filas_3:
     ;inicializamos (j-1)*longitudFila 
     mov r15d, [longitudFila] ; Longitud de un elemento
     imul r15d, r14d; i * longitudFila
+    cmp r14d,4
+    jl continuar_imprimir_3
+    cmp r12d,1
+    jle continuar_imprimir_3
+    cmp r12d,5
+    jge continuar_imprimir_3
+setear_flag_fuerte_3:
+    mov byte[flag_fuerte],1
+continuar_imprimir_3:
     sub rsp,8
     call imprimir_casilla
     add rsp,8
+    mov rdi, color_reset
+    sub rsp,8
+    call printf
+    add rsp,8
+    mov byte[flag_fuerte],0
     ;Incremento j y si j<columnas contiuo iterando por columnas
     inc r14d
     cmp r14d, 7
@@ -412,9 +440,23 @@ recorrer_filas_4:
     ;inicializamos (j-1)*longitudFila 
     mov r15d, [longitudFila] ; Longitud de un elemento
     imul r15d, r14d; i * longitudFila
+    cmp r14d,4
+    jl continuar_imprimir_4
+    cmp r12d,1
+    jle continuar_imprimir_4
+    cmp r12d,5
+    jge continuar_imprimir_4
+setear_flag_fuerte_4:
+    mov byte[flag_fuerte],1
+continuar_imprimir_4:
     sub rsp,8
     call imprimir_casilla
     add rsp,8
+    mov rdi, color_reset
+    sub rsp,8
+    call printf
+    add rsp,8
+    mov byte[flag_fuerte],0
     ;Incremento j y si j<columnas contiuo iterando por columnas
     dec r14d
     cmp r14d, 0
