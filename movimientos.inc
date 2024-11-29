@@ -202,7 +202,7 @@ eliminar_soldado:
     cambio_turno_oficial:
         mov byte[turno], 0
 		mov byte[tiene_que_comer], 0
-        ret
+        jmp juego
 ;------------------------------------------------------------------SI EL OFICIAL NO CUMPLE CON SU DEBER
 
    eliminar_oficial:
