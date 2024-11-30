@@ -31,8 +31,8 @@ section .data
     cantidad_soldados db 24
     cantidad_oficiales db 2
     turno db 1 ;0 si es turno del jugador 1(soldado), 1 si es turno del jugador 2(oficial)
-    stats_oficial_1 db 0,0,0,0,0,0,0,0,0 ;0: izq | 1: der | 2: abajo | 3: arriba | 4: superior der | 5: superior izq | 6: inferior der | 7: inferior izq | 8: capturas 
-    stats_oficial_2 db 0,0,0,0,0,0,0,0,0
+    stats_oficial_1 dw 0,0,0,0,0,0,0,0,0 ;0: izq | 1: der | 2: abajo | 3: arriba | 4: superior der | 5: superior izq | 6: inferior der | 7: inferior izq | 8: capturas 
+    stats_oficial_2 dw 0,0,0,0,0,0,0,0,0
     posicion_oficial2 dw "54",0
     posicion_oficial1 dw "62",0
 ;************************************************************    
@@ -50,10 +50,10 @@ section .data
     msg_estadisticas_oficial1 db "Estadísticas Oficial 1:", 10, 0
     msg_estadisticas_oficial2 db "Estadísticas Oficial 2:",10, 0
 
-    txt_movimientos_direcciones db "Izquierda: %hhi, Derecha: %hhi, Abajo: %hhi,  Arriba: %hhi",10,0
-    txt_movimientos_diagonales db "Diagonal superior derecha: %hhi, Diagonal superior izquierda: %hhi",10,0
-    txt_movimientos_diagonales_2 db "Diagonal inferior derecha: %hhi, Diagonal inferior izquierda: %hhi",10,0
-    txt_capturas db "Capturas: %hhi",10,0
+    txt_movimientos_direcciones db "Izquierda: %hi, Derecha: %hi, Abajo: %hi,  Arriba: %hi",10,0
+    txt_movimientos_diagonales db "Diagonal superior derecha: %hi, Diagonal superior izquierda: %hi",10,0
+    txt_movimientos_diagonales_2 db "Diagonal inferior derecha: %hi, Diagonal inferior izquierda: %hi",10,0
+    txt_capturas db "Capturas: %hi",10,0
 section .bss
     casilla resb 2 ;casilla a la que se quiere mover el jugador
     oficial_elegido resb 1; oficial elegido

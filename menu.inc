@@ -637,13 +637,13 @@ section .text
 
         ; guardo la posicion del oficial elegido
         eleccion_oficial2: 
-        mov esi, [stats_oficial_2]
+        mov r12d, stats_oficial_2
         mov byte[oficial_elegido], 2
 
         jmp comprobar_validez_movimiento
 
         eleccion_oficial1: 
-        mov esi, [stats_oficial_1]
+        mov r12d, stats_oficial_1
         mov byte[oficial_elegido] ,1
 
     comprobar_validez_movimiento:
@@ -651,11 +651,12 @@ section .text
 		je movimiento_oficial
 		cmp byte[valido],0
 		je pedir_casilla_destino_oficial
+        ; cambiar a solo jmp movimiento_oficial
 
         ;despues de ver la validez del movimiento valido las estadisticas
-        sub rsp, 8
-        call validar_estadisticas
-        add rsp, 8
+        ;sub rsp, 8
+        ;call validar_estadisticas
+        ;add rsp, 8
 ;----------------------------------------------------------------
 
     mover_oficial: ;"1-Mover oficial      |   2-Volver atras   |   3-Salir del juego"
@@ -737,12 +738,12 @@ section .text
 
     validar_estadisticas:
         ; en esi llega el vector del soldado en particular a incrementar
-        mov al, [fila] ; guardo la fila inicial 
-        mov ah, [columna] ; guardo la columna inicial 
 
         ; obtengo la fila y columna de la posicion de destino
-        obtener_fila_columna casilla_destino, fila, columna
+        obtener_fila_columna casilla_partida, fila, columna
 
+        mov al, [fila] ; guardo la fila inicial 
+        mov ah, [columna] ; guardo la columna inicial 
         ; CASOS POSIBLES: 
         ; fila igual y columna mayor -> se mueve hacia derecha
         ; fila igual y columna menor -> se mueve hacia izquierda
@@ -782,29 +783,29 @@ section .text
         jl incrementar_superior_izquierda
 
     incrementar_izquierda:
-        inc byte[esi + 0]  ; Izquierda
-        ret
+        inc word[r12d + 0]  ; Izquierda
+        jmp verificaciones_final
     incrementar_derecha:
-        inc byte[esi + 1]  ; Derecha
-        ret
+        inc word[r12d + 2]  ; Derecha
+        jmp verificaciones_final
     incrementar_abajo:
-        inc byte[esi + 2]  ; Abajo
-        ret
+        inc word[r12d + 4]  ; Abajo
+        jmp verificaciones_final
     incrementar_arriba:
-        inc byte[esi + 3]  ; Arriba
-        ret
+        inc word[r12d + 6]  ; Arriba
+        jmp verificaciones_final
     incrementar_superior_derecha:
-        inc byte[esi + 4] ; Superior derecha
-        ret
+        inc word[r12d + 8] ; Superior derecha
+        jmp verificaciones_final
     incrementar_superior_izquierda:
-        inc byte[esi + 5] ; Superior izquierda
-        ret
+        inc word[r12d + 10] ; Superior izquierda
+        jmp verificaciones_final
     incrementar_inferior_derecha:
-        inc byte[esi + 6]  ; Inferior derecha
-        ret
+        inc word[r12d + 12]  ; Inferior derecha
+        jmp verificaciones_final
     incrementar_inferior_izquierda:
-        inc byte[esi + 7] ; Inferior izquierda
-        ret
+        inc word[r12d + 14] ; Inferior izquierda
+        jmp verificaciones_final
 ;----------------------------------------------------------------
     salir_juego:
         ; Imprimir estadisticas antes de salir del juego
@@ -882,23 +883,31 @@ section .text
         call printf
         add rsp, 8
 
-        mov rsi, [stats_oficial_1]
-        mov rdi, txt_movimientos_direcciones
+        mov rdi, txt_movimientos_direcciones ; mensaje
+        mov rsi, [stats_oficial_1] ;izq
+        mov rdx, [stats_oficial_1 + 2] ;der
+        mov rcx, [stats_oficial_1 + 4] ;arriba
+        mov r8, [stats_oficial_1 + 6] ;abajo
         sub rsp, 8
         call printf
         add rsp, 8
 
         mov rdi, txt_movimientos_diagonales
+        mov rsi, [stats_oficial_1 + 8] ;arr der
+        mov rdx, [stats_oficial_1 + 10] ;der izq
         sub rsp, 8
         call printf
         add rsp, 8
 
         mov rdi, txt_movimientos_diagonales_2
+        mov rsi, [stats_oficial_1 + 12] ;inf der
+        mov rdx, [stats_oficial_1 + 14] ;inf izq
         sub rsp, 8
         call printf
         add rsp, 8
 
         mov rdi, txt_capturas
+        mov rsi, [stats_oficial_1 + 16] ;capturas
         sub rsp, 8
         call printf
         add rsp, 8
@@ -909,23 +918,31 @@ section .text
         call printf
         add rsp, 8
 
-        mov rsi, [stats_oficial_2]
         mov rdi, txt_movimientos_direcciones
+        mov rsi, [stats_oficial_2]
+        mov rdx, [stats_oficial_2 + 2] ;der
+        mov rcx, [stats_oficial_2 + 4] ;arriba
+        mov r8, [stats_oficial_2 + 6] ;abajo
         sub rsp, 8
         call printf
         add rsp, 8
 
         mov rdi, txt_movimientos_diagonales
+        mov rsi, [stats_oficial_2 + 8] ;arr der
+        mov rdx, [stats_oficial_2 + 10] ;der izq
         sub rsp, 8
         call printf
         add rsp, 8
 
         mov rdi, txt_movimientos_diagonales_2
+        mov rsi, [stats_oficial_2 + 12] ;inf der
+        mov rdx, [stats_oficial_2 + 14] ;inf izq
         sub rsp, 8
         call printf
         add rsp, 8
 
         mov rdi, txt_capturas
+        mov rsi, [stats_oficial_2 + 16] ;capturas
         sub rsp, 8
         call printf
         add rsp, 8
