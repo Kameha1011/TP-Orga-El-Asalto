@@ -37,6 +37,7 @@ section .data
     txt_opcion db "Ingrese la opción - Solo toma el primer digito: ",0
 
 	formato_ingreso db "%s",0
+    cantidad_oficiales_aux db 2
 
 section .bss
     opcion resb 1
@@ -434,10 +435,24 @@ section .text
         add rsp,8
     bifurcar_a_turno:
         ;Imprimir 'Elegir soldado' o 'Elegir oficial' depende del turno
+        mov al,[cantidad_oficiales]
+        
+        cmp byte[cantidad_oficiales_aux],al
+        jne murio_oficial
+
+        siguiente_turno:
         cmp byte[turno],0
         je txt_elegir_soldado
         cmp byte[turno],1
         je txt_elegir_oficial
+
+        murio_oficial:
+            mov byte[cantidad_oficiales_aux],al
+            sub rsp,8
+            mov rdi,txt_oficial_no_cumple_deber
+            call printf
+            add rsp,8
+            jmp siguiente_turno
 
 ;----------------------------------------------------------------
     txt_elegir_soldado: ;"1-Elige un soldado  |   2-Salir del juego   |  3-Guardar y Salir" 
