@@ -44,14 +44,17 @@ section .text
 
         ;mov byte[matriz + rax], 1 ;marco la casilla del soldado como vacia
 
-       obtener_fila_columna casilla_destino, fila_destino, columna_destino
+       ;obtener_fila_columna casilla_destino, fila_destino, columna_destino
 
         sub rsp,8
         call verificar_movimiento_soldado_valido
         add rsp,8
+        
         cmp byte[valido],0
-        je error_casilla
-
+        jne mover_soldado_a_destino
+        je  bifurcar_a_turno
+        ret
+        mover_soldado_a_destino:
         movzx rax, word[fila_partida]   ; inicializo i filas
         movzx rcx, word[columna_partida]   ;inicializo j columnas
 
@@ -61,7 +64,7 @@ section .text
 
         mov byte[matriz + rax], 1 ;marco la casilla del soldado como vacia
 
-       obtener_fila_columna casilla_destino, fila_destino, columna_destino
+       ;obtener_fila_columna casilla_destino, fila_destino, columna_destino
 
         movzx rax, word[fila_destino]   ; inicializo i filas
         movzx rcx, word[columna_destino]   ;inicializo j columnas
@@ -521,25 +524,33 @@ eliminar_soldado:
                 mov al,[columna_partida]
                 cmp al,[columna_destino]
                 jge movimiento_soldado_invalido
+            mov al,[fila_partida]
+            cmp al,[fila_destino]
+            mov rdi, txt_movimiento_soldado_horizontal
+            jne movimiento_soldado_invalido
             ret
             lado_der:
                 mov al,[columna_partida]
                 cmp al,[columna_destino]
                 jle movimiento_soldado_invalido
+            mov al,[fila_partida]
+            cmp al,[fila_destino]
+            mov rdi, txt_movimiento_soldado_horizontal
+            jne movimiento_soldado_invalido
             ret
 
         validar_mov_vertical_diagonal:
             mov al,[fila_partida]
             cmp al,[fila_destino]
+            mov rdi, txt_movimiento_soldado_dir_fortaleza
             jge movimiento_soldado_invalido
 
         ret
         movimiento_soldado_invalido:
             mov byte[valido],0 ;0 invalido, 1 valido
-            ;sub rsp,8
-            ;mov rsi, txt_movimiento_soldado_invalido
-            ;call printf
-            ;add rsp,8
+            sub rsp,8
+            call printf
+            add rsp,8
 
         ret
     verificar_celda_en_fuerte:      ;cargar en fila y columna. 0 no esta dentro.1 esta dentro.
