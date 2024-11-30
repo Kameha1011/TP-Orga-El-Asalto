@@ -48,6 +48,7 @@ section .text
     	call limpiar_pantalla
         add rsp, 8
     ;Imprimir 'Menu principal'
+    volver_a_menu:
         mov rdi,txt_menu_principal
         sub rsp,8
         call printf
@@ -454,12 +455,22 @@ section .text
        	cmp byte[opcion],'2'
        	je salir_juego
         cmp byte[opcion],"3"
-        je guardar_y_salir
+        je ir_a_guardado_soldado
 
     	sub rsp,8
         call error_ingreso
 		add rsp,8
         jmp txt_elegir_soldado
+
+        ir_a_guardado_soldado:
+            sub rsp,8
+            call guardar_partida
+            add rsp,8
+            cmp rcx,0
+            je txt_elegir_soldado
+            sub rsp,8
+            call salir_juego
+            add rsp,8
 ;----------------------------------------------------------------
     elegir_soldado:
         sub rsp,8
@@ -554,12 +565,21 @@ section .text
        	cmp byte[opcion],"2"
        	je salir_juego
         cmp byte[opcion],"3"
-        je guardar_y_salir
+        je ir_a_guardado_oficial
 
         sub rsp,8
         call error_ingreso
 		add rsp,8
         jmp txt_elegir_oficial
+        ir_a_guardado_oficial:
+            sub rsp,8
+            call guardar_partida
+            add rsp,8
+            cmp rcx,0
+            je txt_elegir_oficial
+            sub rsp,8
+            call salir_juego
+            add rsp,8
 
 ;----------------------------------------------------------------
 
@@ -686,22 +706,15 @@ section .text
         call printf
         add rsp,8
         mov rax, [sys_call]
-        ret
+        jmp verificaciones_final
 ;----------------------------------------------------------------
     continuar_partida:
         sub rsp,8
         call cargar_partida
         add rsp,8
+        cmp rcx,0
+        je volver_a_menu
         jmp juego
-;----------------------------------------------------------------
-    guardar_y_salir:
-        sub rsp,8
-        call guardar_partida
-        add rsp,8
-        sub rsp,8
-        call salir_juego
-        add rsp,8
-        ret
 ;----------------------------------------------------------------
     error_ingreso:
         ;Imprimir 'Error en ingreso'
