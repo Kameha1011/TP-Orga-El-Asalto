@@ -1,9 +1,9 @@
 ; Todo lo relacionado a mostrar datos por pantalla
 ;extern matriz
 section .data
-    soldado db " %s │",0
-    oficial db " %s │",0
-    casilla_vacia db "   │",0
+    soldado db " %s %s│",0
+    oficial db " %s %s│",0
+    casilla_vacia db "   %s│",0
     separador db "│",0
     espacio_en_blanco db " ",0
     salto_de_linea db 10, 0 ; 10 es el valor ASCII de salto de línea
@@ -88,10 +88,6 @@ setear_flag_fuerte:
 continuar_imprimir:
     sub rsp,8
     call imprimir_casilla
-    add rsp,8
-    mov rdi, color_reset
-    sub rsp,8
-    call printf
     add rsp,8
     mov byte[flag_fuerte],0
     ;Incremento j y si j<columnas contiuo iterando por columnas
@@ -200,10 +196,6 @@ setear_flag_fuerte_2:
 continuar_imprimir_2:
     sub rsp,8
     call imprimir_casilla
-    add rsp,8
-    mov rdi, color_reset
-    sub rsp,8
-    call printf
     add rsp,8
     mov byte[flag_fuerte],0
     ;Incremento j y si j<columnas contiuo iterando por columnas
@@ -324,10 +316,6 @@ setear_flag_fuerte_3:
 continuar_imprimir_3:
     sub rsp,8
     call imprimir_casilla
-    add rsp,8
-    mov rdi, color_reset
-    sub rsp,8
-    call printf
     add rsp,8
     mov byte[flag_fuerte],0
     ;Incremento j y si j<columnas contiuo iterando por columnas
@@ -452,10 +440,6 @@ continuar_imprimir_4:
     sub rsp,8
     call imprimir_casilla
     add rsp,8
-    mov rdi, color_reset
-    sub rsp,8
-    call printf
-    add rsp,8
     mov byte[flag_fuerte],0
     ;Incremento j y si j<columnas contiuo iterando por columnas
     dec r14d
@@ -562,6 +546,8 @@ continuar_a_imprimir:
 
 imprimir_casilla_vacia:
     mov rdi, casilla_vacia
+
+    mov rsi, color_reset
     sub rsp, 8
     call printf
     add rsp, 8
@@ -572,6 +558,7 @@ imprimir_casilla_ocupada:
     je imprimir_casilla_soldado
     mov rdi, oficial
     mov rsi, simbolo_oficial
+    mov rdx, color_reset
     sub rsp, 8
     call printf
     add rsp, 8
@@ -580,6 +567,7 @@ imprimir_casilla_ocupada:
 imprimir_casilla_soldado:
     mov rdi, soldado
     mov rsi, simbolo_soldado
+    mov rdx, color_reset
     sub rsp, 8
     call printf
     add rsp, 8
