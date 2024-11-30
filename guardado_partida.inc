@@ -39,7 +39,7 @@ guardar_partida:
     cmp rcx,0
     je end_guardar
     mov rdi, struct_partida             ; Dirección de la estructura
-    mov rsi, 78                         ; Tamaño total de la estructura (calcular manualmente)
+    mov rsi, 98                         ; Tamaño total de la estructura (calcular manualmente)
     mov rdx, 1                          ; Cantidad de bloques a escribir
     mov rcx, [buffer_archivo]           ; Handle del archivo
     sub rsp,8
@@ -59,7 +59,7 @@ cargar_partida:
     cmp rcx,0
     je end_cargar
     mov rdi, struct_partida             ; Dirección donde se copiará la estructura
-    mov rsi, 78                         ; Tamaño total de la estructura
+    mov rsi, 98                         ; Tamaño total de la estructura
     mov rdx, 1                          ; Cantidad de bloques a leer
     mov rcx, [buffer_archivo]           ; Handle del archivo
     sub rsp,8
