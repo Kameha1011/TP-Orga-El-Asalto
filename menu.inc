@@ -514,12 +514,32 @@ section .text
     	cmp byte[valido],0
     	je pedir_casilla_destino_oficial
 
+        ; evaluo cual es el oficial elegido
+        mov ax, [casilla_partida]
+        cmp [posicion_oficial1], ax
+        je eleccion_oficial1
+
+        ; guardo la posicion del oficial elegido
+        eleccion_oficial2: 
+        mov esi, [stats_oficial_2]
+        mov byte[oficial_elegido], 2
+
+        jmp comprobar_validez_movimiento
+
+        eleccion_oficial1: 
+        mov esi, [stats_oficial_1]
+        mov byte[oficial_elegido] ,1
+
+    comprobar_validez_movimiento:
 		cmp byte[valido],1
 		je movimiento_oficial
 		cmp byte[valido],0
 		je pedir_casilla_destino_oficial
 
-
+        ;despues de ver la validez del movimiento valido las estadisticas
+        sub rsp, 8
+        call validar_estadisticas
+        add rsp, 8
 ;----------------------------------------------------------------
 
     mover_oficial: ;"1-Mover oficial      |   2-Volver atras   |   3-Salir del juego"
@@ -558,8 +578,8 @@ section .text
         call scanf
         add rsp,8
         mov bh, [buffer]
-        mov [opcion], bh
-		mov [buffer],'' ;limpio buffer
+        mov byte[opcion], bh
+		mov byte[buffer],'' ;limpio buffer
         cmp rax, 1
         jl error_scan
     	ret
@@ -583,7 +603,7 @@ section .text
         mov bx, [buffer]
         mov [casilla], bx
         mov [casilla_destino], bx
-        mov [buffer],'' ;limpio buffer
+        mov byte[buffer],'' ;limpio buffer
 
         cmp rax, 1
         jl error_scan_casilla
@@ -591,9 +611,86 @@ section .text
     error_scan_casilla:
         mov word[casilla],"11"
         ret
+;----------------------------------------------------------------
+    ;Seccion estadisticas
 
+    validar_estadisticas:
+        ; en esi llega el vector del soldado en particular a incrementar
+        mov al, [fila] ; guardo la fila inicial 
+        mov ah, [columna] ; guardo la columna inicial 
+
+        ; obtengo la fila y columna de la posicion de destino
+        obtener_fila_columna casilla_destino, fila, columna
+
+        ; CASOS POSIBLES: 
+        ; fila igual y columna mayor -> se mueve hacia derecha
+        ; fila igual y columna menor -> se mueve hacia izquierda
+        
+        ; fila mayor y columna igual -> se mueve hacia arriba
+        ; fila mayor y columna mayor -> se mueve a superior derecha
+        ; fila mayor y columna menor -> se mueve a superior izquierda
+        
+        ; fila menor y columna igual -> se mueve hacia abajo
+        ; fila menor y columna mayor -> se mueve a inferior derecha
+        ; fila menor y columna menor -> se mueve a inferior izquierda
+        
+
+ ; Comparar filas y columnas para determinar dirección
+        cmp byte[fila_destino], al
+        je fila_destino_igual
+        cmp byte[fila_destino], al
+        jg fila_destino_mayor
+
+    fila_destino_menor:
+        cmp byte[columna_destino], ah
+        je incrementar_abajo
+        cmp byte[columna_destino], ah
+        jg incrementar_inferior_derecha
+        jl incrementar_inferior_izquierda
+
+    fila_destino_igual:
+        cmp byte[columna_destino], ah
+        jg incrementar_derecha
+        jl incrementar_izquierda
+
+    fila_destino_mayor:
+        cmp byte[columna_destino], ah
+        je incrementar_arriba
+        cmp byte[columna_destino], ah
+        jg incrementar_superior_derecha
+        jl incrementar_superior_izquierda
+
+    incrementar_izquierda:
+        inc byte[esi + 0]  ; Izquierda
+        ret
+    incrementar_derecha:
+        inc byte[esi + 1]  ; Derecha
+        ret
+    incrementar_abajo:
+        inc byte[esi + 2]  ; Abajo
+        ret
+    incrementar_arriba:
+        inc byte[esi + 3]  ; Arriba
+        ret
+    incrementar_superior_derecha:
+        inc byte[esi + 4] ; Superior derecha
+        ret
+    incrementar_superior_izquierda:
+        inc byte[esi + 5] ; Superior izquierda
+        ret
+    incrementar_inferior_derecha:
+        inc byte[esi + 6]  ; Inferior derecha
+        ret
+    incrementar_inferior_izquierda:
+        inc byte[esi + 7] ; Inferior izquierda
+        ret
 ;----------------------------------------------------------------
     salir_juego:
+        ; Imprimir estadisticas antes de salir del juego
+        sub rsp, 8
+        call imprimir_estadisticas_oficiales
+        add rsp, 8
+
         ;Imprimir 'Salir del juego'
         mov rdi, txt_salir_juego
         sub rsp,8
@@ -663,4 +760,60 @@ section .text
 	salida:
         ret
 ;----------------------------------------------------------------
+    ;imprimimos las estadisticas de los oficiales
+    imprimir_estadisticas_oficiales:
+        ; Imprimir estadísticas oficial 1
+        mov rdi, msg_estadisticas_oficial1
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rsi, [stats_oficial_1]
+        mov rdi, txt_movimientos_direcciones
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales_2
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_capturas
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        ; Imprimir estadísticas oficial 2
+        mov rdi, msg_estadisticas_oficial2
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rsi, [stats_oficial_2]
+        mov rdi, txt_movimientos_direcciones
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales_2
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_capturas
+        sub rsp, 8
+        call printf
+        add rsp, 8
+        ret
 

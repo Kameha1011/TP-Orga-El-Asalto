@@ -169,6 +169,8 @@ actualizar_posicion_oficial:
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
 
+        ; al comer soldado, se le pasa al esi el vector/contador del oficial que realizo el movimiento 
+        inc byte[esi + 8]
 eliminar_soldado:
         movzx rax, word[fila_destino]; inicializo i filas
         movzx rcx, word[columna_destino];inicializo j columnas
