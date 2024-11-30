@@ -17,9 +17,10 @@ section .data
     txt_simbolo_soldados db "Ingrese el simbolo de los soldados: ",10,0
     txt_simbolo_oficiales db "Ingrese el simbolo de los oficiales: ",10,0
     txt_orientacion_tablero db "Elija la orientacion del tablero (arriba por defecto): ",10,0
-    txt_menu_orientacion_tablero db "1-Arriba   |   2-Abajo   |   3-Izquierda   |   4-Derecha   | 5-Volver",10,0
+    txt_menu_orientacion_tablero db "1-Abajo   |   2-Arriba   |   3-Izquierda   |   4-Derecha   | 5-Volver",10,0
     txt_quien_empieza db "1-Empiezan los soldados   |   2-Empiezan los oficiales   | 3-Volver",10,0
-
+    txt_elegir_rotacion db "1-Elegir rotacion   |   2-Volver atras",10,0
+    txt_opcion_invalida db "Opción inválida",10,0
 
 
     txt_menu_juego db "Menú de juego",10,0
@@ -29,7 +30,6 @@ section .data
     txt_turno_oficial db "1-Elige un oficial   |   2-Salir del juego   |   3-Guardar y Salir",10,0
     txt_mover_oficial db "1-Mover oficial      |   2-Volver atras   |   3-Salir del juego",10,0 ;→calcular casillas disponibles y mostrarlas. (ver el caso si se saltó una captura)
     txt_salir_juego db "Saliendo ...",10,0
-
     txt_error_ingreso db "Error en ingreso",10,0
     txt_casilla_invalida db "Casilla inválida",10,0
 
@@ -214,13 +214,13 @@ section .text
         add rsp,8
 
         cmp byte[opcion],'1'
-        je orientacion_abajo
+        je preview_abajo
         cmp byte[opcion],'2'
-        je orientacion_arriba
+        je preview_arriba
         cmp byte[opcion],'3'
-        je orientacion_izquierda
+        je preview_izq
         cmp byte[opcion],'4'
-        je orientacion_derecha
+        je preview_der
         cmp byte[opcion],'5'
         je menu_personalizar_partida
 
@@ -229,10 +229,90 @@ section .text
 		add rsp,8
         jmp personalizar_orientacion_tablero
 
-      orientacion_arriba:
+
+      preview_arriba:
+        sub rsp,8
+        call imprimir_tablero_rotado_arriba
+        add rsp,8
+        mov rdi, txt_elegir_rotacion
+        sub rsp,8
+        call printf
+        add rsp,8
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+
+        cmp byte[opcion],"1"
+        je orientacion_arriba
+        cmp byte[opcion],"2"
+        je personalizar_orientacion_tablero
+        jmp error_ingreso_opcion_rotacion
+
+      preview_izq:
+        sub rsp,8
+        call imprimir_tablero_rotado_izq
+        add rsp,8
+        mov rdi, txt_elegir_rotacion
+        sub rsp,8
+        call printf
+        add rsp,8
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+
+        cmp byte[opcion],"1"
+        je orientacion_izquierda
+        cmp byte[opcion],"2"
+        je personalizar_orientacion_tablero
+        jmp error_ingreso_opcion_rotacion
+
+      preview_der:
+        sub rsp,8
+        call imprimir_tablero_rotado_der
+        add rsp,8
+        mov rdi, txt_elegir_rotacion
+        sub rsp,8
+        call printf
+        add rsp,8
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+
+        cmp byte[opcion],"1"
+        je orientacion_derecha
+        cmp byte[opcion],"2"
+        je personalizar_orientacion_tablero
+        jmp error_ingreso_opcion_rotacion
+
+      preview_abajo:
+        sub rsp,8
+        call imprimir_tablero
+        add rsp,8
+        mov rdi, txt_elegir_rotacion
+        sub rsp,8
+        call printf
+        add rsp,8
+        sub rsp,8
+        call leer_opcion
+        add rsp,8
+
+        cmp byte[opcion], "1"
+        je orientacion_abajo
+        cmp byte[opcion],"2"
+        je personalizar_orientacion_tablero
+        jmp error_ingreso_opcion_rotacion
+
+    error_ingreso_opcion_rotacion:
+        mov rdi, txt_opcion_invalida
+        sub rsp,8
+        call printf
+        add rsp,8
+        jmp personalizar_orientacion_tablero
+
+   	  orientacion_abajo:
         mov byte[orientacion_tablero],1
         jmp menu_personalizar_partida
-   	  orientacion_abajo:
+      orientacion_arriba:
         mov byte[orientacion_tablero],2
         jmp menu_personalizar_partida
       orientacion_izquierda:
