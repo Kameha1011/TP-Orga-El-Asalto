@@ -7,6 +7,14 @@ extern system
 section .data
     cmd_clear db "clear",0
 
+	txt_el_asalto db "      ::::::::::  :::                  :::        ::::::::        :::       :::    ::::::::::: :::::::: ",10,
+	              db "     :+:         :+:                :+: :+:     :+:    :+:     :+: :+:     :+:        :+:    :+:    :+: ",10,
+	              db "    +:+         +:+               +:+   +:+    +:+           +:+   +:+    +:+        +:+    +:+    +:+  ",10,
+	              db "   +#++:++#    +#+              +#++:++#++:   +#++:++#++   +#++:++#++:   +#+        +#+    +#+    +:+   ",10,
+	              db "  +#+         +#+              +#+     +#+          +#+   +#+     +#+   +#+        +#+    +#+    +#+    ",10,
+	              db " #+#         #+#              #+#     #+#   #+#    #+#   #+#     #+#   #+#        #+#    #+#    #+#     ",10,
+	              db "##########  ##########       ###     ###    ########    ###     ###   ########## ###     ########",10,0
+
     txt_menu_principal db "Menú principal",10,0
     txt_menu_principal_opciones db "1-Continuar partida   |   2-Nueva partida   |   3-Salir del juego",10,0
     txt_continuar_partida db "Continuar partida",10,0
@@ -49,8 +57,14 @@ section .text
     	sub rsp, 8
     	call limpiar_pantalla
         add rsp, 8
+
     ;Imprimir 'Menu principal'
     volver_a_menu:
+    	;Imprimir 'El Asalto'
+		mov rdi,txt_el_asalto
+		sub rsp,8
+		call printf
+		add rsp,8
         mov rdi,txt_menu_principal
         sub rsp,8
         call printf
