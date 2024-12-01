@@ -81,6 +81,10 @@ section .text
         ret
     ;------------------------------------------------------------------
     movimiento_oficial:
+        mov byte[tiene_que_comer], 0
+        mov byte[tiene_que_comer_1], 0
+        mov byte[tiene_que_comer_2], 0
+        mov byte[oficial_por_cumplir], 0
         ;obtener fila y columna de la casilla de destino
 
         obtener_fila_columna casilla_destino, fila_destino, columna_destino
