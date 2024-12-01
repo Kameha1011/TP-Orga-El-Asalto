@@ -22,7 +22,7 @@ section .data
     separador_horizontal         db " ├───┼───┼───┼───┼───┼───┼───┤",10,0
     separador_horizontal_arriba       db " └───┴───┼───┼───┼───┼───┴───┘",10,0
     separador_horizontal_final   db "         └───┴───┴───┘        ",10,0
-    bg_negro db 0x1B, '[','0', '1', '0', '5','m', 0
+    bg_rojo db 0x1B, '[','1','0','1','m', 0x1B, '[','9','7','m', 0
     color_reset db 0x1B, '[', '0', 'm', 0
     flag_fuerte db 0 ; 0 si no esta en fuerte, 1 si esta en fuerte
 section .bss
@@ -527,7 +527,7 @@ imprimir_salto_de_linea:
 imprimir_casilla:
     cmp byte[flag_fuerte],0
     je setear_bg_transparente
-    mov rdi, bg_negro
+    mov rdi, bg_rojo
     sub rsp,8
     call printf
     add rsp,8
@@ -609,8 +609,8 @@ imprimir_espacio_en_blanco:
     add rsp,8
     ret
 
-set_bg_negro:
-    mov rdi,bg_negro
+set_bg_rojo:
+    mov rdi,bg_rojo
     sub rsp,8
     call printf
     add rsp,8
