@@ -740,11 +740,12 @@ section .text
     validar_estadisticas:
         ; en esi llega el vector del soldado en particular a incrementar
 
-        ; obtengo la fila y columna de la posicion de destino
+        ; obtengo la fila y columna de la posicion de partida
         obtener_fila_columna casilla_partida, fila, columna
 
         mov al, [fila] ; guardo la fila inicial 
         mov ah, [columna] ; guardo la columna inicial 
+        
         ; CASOS POSIBLES: 
         ; fila igual y columna mayor -> se mueve hacia derecha
         ; fila igual y columna menor -> se mueve hacia izquierda
@@ -758,55 +759,55 @@ section .text
         ; fila menor y columna menor -> se mueve a inferior izquierda
         
 
- ; Comparar filas y columnas para determinar dirección
+        ; Comparar filas y columnas para determinar dirección
         cmp byte[fila_destino], al
         je fila_destino_igual
         cmp byte[fila_destino], al
-        jg fila_destino_mayor
+        jg fila_destino_menor
 
-    fila_destino_menor:
-        cmp byte[columna_destino], ah
-        je incrementar_abajo
-        cmp byte[columna_destino], ah
-        jg incrementar_inferior_derecha
-        jl incrementar_inferior_izquierda
+        fila_destino_mayor:
+            cmp byte[columna_destino], ah
+            je incrementar_arriba
+            cmp byte[columna_destino], ah
+            jg incrementar_superior_derecha
+            jl incrementar_superior_izquierda
 
-    fila_destino_igual:
-        cmp byte[columna_destino], ah
-        jg incrementar_derecha
-        jl incrementar_izquierda
+        fila_destino_igual:
+            cmp byte[columna_destino], ah
+            jg incrementar_derecha
+            jl incrementar_izquierda
 
-    fila_destino_mayor:
-        cmp byte[columna_destino], ah
-        je incrementar_arriba
-        cmp byte[columna_destino], ah
-        jg incrementar_superior_derecha
-        jl incrementar_superior_izquierda
+        fila_destino_menor:
+            cmp byte[columna_destino], ah
+            je incrementar_abajo
+            cmp byte[columna_destino], ah
+            jg incrementar_inferior_derecha
+            jl incrementar_inferior_izquierda
 
-    incrementar_izquierda:
-        inc word[r12d + 0]  ; Izquierda
-        jmp verificaciones_final
-    incrementar_derecha:
-        inc word[r12d + 2]  ; Derecha
-        jmp verificaciones_final
-    incrementar_abajo:
-        inc word[r12d + 4]  ; Abajo
-        jmp verificaciones_final
-    incrementar_arriba:
-        inc word[r12d + 6]  ; Arriba
-        jmp verificaciones_final
-    incrementar_superior_derecha:
-        inc word[r12d + 8] ; Superior derecha
-        jmp verificaciones_final
-    incrementar_superior_izquierda:
-        inc word[r12d + 10] ; Superior izquierda
-        jmp verificaciones_final
-    incrementar_inferior_derecha:
-        inc word[r12d + 12]  ; Inferior derecha
-        jmp verificaciones_final
-    incrementar_inferior_izquierda:
-        inc word[r12d + 14] ; Inferior izquierda
-        jmp verificaciones_final
+        incrementar_izquierda:
+            inc word[r12d + 0]  ; Izquierda
+            jmp verificaciones_final
+        incrementar_derecha:
+            inc word[r12d + 2]  ; Derecha
+            jmp verificaciones_final
+        incrementar_abajo:
+            inc word[r12d + 4]  ; Abajo
+            jmp verificaciones_final
+        incrementar_arriba:
+            inc word[r12d + 6]  ; Arriba
+            jmp verificaciones_final
+        incrementar_superior_derecha:
+            inc word[r12d + 8] ; Superior derecha
+            jmp verificaciones_final
+        incrementar_superior_izquierda:
+            inc word[r12d + 10] ; Superior izquierda
+            jmp verificaciones_final
+        incrementar_inferior_derecha:
+            inc word[r12d + 12]  ; Inferior derecha
+            jmp verificaciones_final
+        incrementar_inferior_izquierda:
+            inc word[r12d + 14] ; Inferior izquierda
+            jmp verificaciones_final
 ;----------------------------------------------------------------
     salir_juego:
         ; Imprimir estadisticas antes de salir del juego
