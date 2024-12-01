@@ -187,17 +187,17 @@ eliminar_soldado:
         imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
         mov byte[matriz + rax], 1 ;marco la casilla del soldado como vacia
-
+;mover oficial
         movzx rax, word[fila_destino]   ; calculo i filas
         movzx rcx, word[columna_destino]   ;calculo j columnas
 
         imul rax, rax, 2
         sub ax, [fila_partida]
-        mov [fila_destino], rax
+        mov [fila_destino], ax
 
         imul rcx, rcx, 2
         sub cx, [columna_partida]
-        mov [columna_destino], rcx
+        mov [columna_destino], cx
 
         imul rax,7      ;i filas * cant columnas
         add  rax,rcx     ;(i filas * cant columnas) + j columnas
@@ -207,6 +207,15 @@ eliminar_soldado:
         mov byte[matriz + rax], bl ;marco la casilla de destino con el oficial
 
         dec byte[cantidad_soldados]
+
+        mov al ,byte[fila_destino]
+        add al, '0'
+        mov byte[casilla_destino], al
+        mov al ,byte[columna_destino]
+        add al, '0'
+        mov byte[casilla_destino+1], al
+
+        jmp actualizar_posicion_oficial
 
     cambio_turno_oficial:
         mov byte[turno], 0

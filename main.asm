@@ -7,8 +7,31 @@ extern scanf
 extern sscanf
 
 section .data
-    soldados_insuficientes db "No quedan suficientes soldados, los oficiales ganan la partida",10,0
-    oficiales_insuficientes db "No quedan oficiales, los soldados ganan la partida",10,0
+    soldados_insuficientes db "                    ⠀⠀⠀⠀⢀⣀⣤⣤⣤⣤⣄⡀⠀⠀⠀⠀",10,
+                               db "                    ⠀⢀⣤⣾⣿⣾⣿⣿⣿⣿⣿⣿⣷⣄⠀⠀",10,
+                               db "                    ⢠⣾⣿⢛⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀",10,
+                               db "                    ⣾⣯⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧",10,
+                               db "                    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿",10,
+                               db "                    ⣿⡿⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠻⢿⡵",10,
+                               db "                    ⣿⡇⠀⠀⠉⠛⠛⣿⣿⠛⠛⠉⠀⠀⣿⡇",10,
+                               db "                    ⣿⣿⣀⠀⢀⣠⣴⡇⠹⣦⣄⡀⠀⣠⣿⡇",10,
+                               db "                    ⠋⠻⠿⠿⣟⣿⣿⣦⣤⣼⣿⣿⠿⠿⠟⠀",10,
+                               db "                    ⠀⠀⠀⠀⠸⡿⣿⣿⢿⡿⢿⠇⠀⠀⠀⠀",10,
+                               db "                    ⠀⠀⠀⠀⠀⠀⠈⠁⠈⠁⠀⠀⠀⠀⠀⠀",10,
+                               db "No quedan suficientes soldados, los oficiales ganan la partida",10,0
+
+    oficiales_insuficientes db "                    ⠀⠀⠀⠀⢀⣀⣤⣤⣤⣤⣄⡀⠀⠀⠀⠀",10,
+                                db "                    ⠀⢀⣤⣾⣿⣾⣿⣿⣿⣿⣿⣿⣷⣄⠀⠀",10,
+                                db "                    ⢠⣾⣿⢛⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡀",10,
+                                db "                    ⣾⣯⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧",10,
+                                db "                    ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿",10,
+                                db "                    ⣿⡿⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠻⢿⡵",10,
+                                db "                    ⣿⡇⠀⠀⠉⠛⠛⣿⣿⠛⠛⠉⠀⠀⣿⡇",10,
+                                db "                    ⣿⣿⣀⠀⢀⣠⣴⡇⠹⣦⣄⡀⠀⣠⣿⡇",10,
+                                db "                    ⠋⠻⠿⠿⣟⣿⣿⣦⣤⣼⣿⣿⠿⠿⠟⠀",10,
+                                db "                    ⠀⠀⠀⠀⠸⡿⣿⣿⢿⡿⢿⠇⠀⠀⠀⠀",10,
+                                db "                    ⠀⠀⠀⠀⠀⠀⠈⠁⠈⠁⠀⠀⠀⠀⠀⠀",10,
+                                db "No quedan oficiales, los soldados ganan la partida",10,0
     fuerte_tomado db "El fuerte ha sido tomado, los soldados ganan la partida",10,0
     casilla_partida dw "",0 ;casilla de la cual se quiere mover el jugador
     casilla_destino dw "",0 ;casilla a la cual se quiere mover el jugador

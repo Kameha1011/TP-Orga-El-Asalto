@@ -436,8 +436,8 @@ section .text
         add rsp,8
     bifurcar_a_turno:
         ;Imprimir 'Elegir soldado' o 'Elegir oficial' depende del turno
+
         mov al,[cantidad_oficiales]
-        
         cmp byte[cantidad_oficiales_aux],al
         jne murio_oficial
 
@@ -735,7 +735,7 @@ section .text
         mov word[casilla],"11"
         ret
 ;----------------------------------------------------------------
-    ;Seccion estadisticas
+;Seccion estadisticas
 
     validar_estadisticas:
         ; en esi llega el vector del soldado en particular a incrementar
@@ -826,6 +826,8 @@ section .text
         sub rsp,8
         call cargar_partida
         add rsp,8
+    	mov al, [cantidad_oficiales]
+    	mov [cantidad_oficiales_aux],al
         cmp rcx,0
         je volver_a_menu
         jmp juego
