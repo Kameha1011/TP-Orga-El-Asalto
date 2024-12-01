@@ -42,7 +42,8 @@ section .data
 section .bss
     opcion resb 1
 	valido resb 1 ; 0 para invalido y 1 para valido
-    buffer resb 1
+    buffer_opcion resb 1
+    buffer_casilla_menu resb 2
 section .text
     menu_principal:
     	sub rsp, 8
@@ -695,13 +696,13 @@ section .text
         add rsp,8
     ;Leer opcion
     	mov rdi, formato_ingreso
-    	lea rsi, [buffer]
+    	lea rsi, [buffer_opcion]
         sub rsp,8
         call scanf
         add rsp,8
-        mov bh, [buffer]
+        mov bh, [buffer_opcion]
         mov byte[opcion], bh
-		mov byte[buffer],'' ;limpio buffer
+		mov byte[buffer_opcion],'' ;limpio buffer
         cmp rax, 1
         jl error_scan
     	ret
@@ -717,15 +718,15 @@ section .text
         add rsp,8
     ;Leer casilla
         mov rdi, formato_ingreso
-    	lea rsi, [buffer]
+    	lea rsi, [buffer_casilla_menu]
         sub rsp,8
         call scanf
         add rsp,8
 
-        mov bx, [buffer]
+        mov bx, [buffer_casilla_menu]
         mov [casilla], bx
         mov [casilla_destino], bx
-        mov byte[buffer],'' ;limpio buffer
+        mov byte[buffer_casilla_menu],'' ;limpio buffer
 
         cmp rax, 1
         jl error_scan_casilla
@@ -864,11 +865,11 @@ section .text
     clear_input_buffer:
         mov rax, 0              ; Syscall for read
         mov rdi, 0              ; File descriptor for standard input (stdin)
-        lea rsi, [buffer]       ; Buffer to store discarded input
+        lea rsi, [buffer_casilla_menu]       ; Buffer to store discarded input
         mov rdx, 1              ; Read one byte at a time
     clear_loop:
         syscall                 ; Read one byte
-        cmp byte [buffer], 10   ; Check if it's a newline character (ASCII 10)
+        cmp byte [buffer_casilla_menu], 10   ; Check if it's a newline character (ASCII 10)
         jne clear_loop          ; Repeat until newline is found
         ret                     ; Return to caller
 ;----------------------------------------------------------------
