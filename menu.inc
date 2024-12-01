@@ -401,6 +401,10 @@ section .text
 
         ret
     fin:
+        sub rsp, 8
+        call imprimir_estadisticas_oficiales
+        add rsp, 8
+
         mov rax,[sys_call]
         mov rdi,[exit_code]
         syscall
@@ -408,6 +412,11 @@ section .text
         sub rsp, 8
         call elegir_orientacion
         add rsp,8
+
+        sub rsp, 8
+        call imprimir_estadisticas_oficiales
+        add rsp, 8
+
         mov rdi, oficiales_insuficientes
         sub rsp, 8
         call printf
@@ -420,6 +429,11 @@ section .text
         sub rsp, 8
         call elegir_orientacion
         add rsp,8
+
+        sub rsp, 8
+        call imprimir_estadisticas_oficiales
+        add rsp, 8
+
         mov rdi, soldados_insuficientes
         sub rsp, 8
         call printf
@@ -432,6 +446,11 @@ section .text
         sub rsp, 8
         call elegir_orientacion
         add rsp,8
+
+        sub rsp, 8
+        call imprimir_estadisticas_oficiales
+        add rsp, 8
+        
         mov rdi, fuerte_tomado
         sub rsp, 8
         call printf
