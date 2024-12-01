@@ -105,6 +105,14 @@ section .text
     	cmp byte[valido],0
     	je pedir_casilla_destino_oficial
 
+        ;------------
+        sub rsp,8
+        call activar_flag_quien_puede_comer
+        add rsp,8
+        mov byte[tiene_que_comer],0
+        obtener_fila_columna casilla_partida,fila_partida,columna_partida
+        ;------------
+
         movzx rax, word[fila_partida]   ; inicializo i filas
         movzx rcx, word[columna_partida]   ;inicializo j columnas
 
@@ -113,12 +121,8 @@ section .text
         imul rax,1       ;((i filas * cant columnas) + j columnas) * long elemento
 
         mov byte[matriz + rax], 1 ;marco la casilla del oficial como vacia
-        ;------------
-        sub rsp,8
-        call activar_flag_quien_puede_comer
-        add rsp,8
-        mov byte[tiene_que_comer],0
-        obtener_fila_columna casilla_partida,fila_partida,columna_partida
+        
+        
         sub rsp,8
         call verificar_movimiento_oficial_valido
         add rsp,8
