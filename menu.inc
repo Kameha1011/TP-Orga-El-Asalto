@@ -25,7 +25,7 @@ section .data
     txt_simbolo_soldados db "Ingrese el simbolo de los soldados: ",10,0
     txt_simbolo_oficiales db "Ingrese el simbolo de los oficiales: ",10,0
     txt_orientacion_tablero db "Elija la orientacion del tablero (arriba por defecto): ",10,0
-    txt_menu_orientacion_tablero db "1-Abajo   |   2-Arriba   |   3-Izquierda   |   4-Derecha   | 5-Volver",10,0
+    txt_menu_orientacion_tablero db "1-Abajo   |   2-Arriba   |   3-Izsquierda   |   4-Derecha   | 5-Volver",10,0
     txt_quien_empieza db "1-Empiezan los soldados   |   2-Empiezan los oficiales   | 3-Volver",10,0
     txt_elegir_rotacion db "1-Elegir rotacion   |   2-Volver atras",10,0
     txt_opcion_invalida db "Opción inválida",10,0
@@ -401,10 +401,7 @@ section .text
 
         ret
     fin:
-        sub rsp, 8
-        call imprimir_estadisticas_oficiales
-        add rsp, 8
-
+    
         mov rax,[sys_call]
         mov rdi,[exit_code]
         syscall
