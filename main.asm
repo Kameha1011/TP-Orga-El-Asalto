@@ -53,7 +53,7 @@ section .data
     soldados_en_fuerte db 0
     cantidad_soldados db 24
     cantidad_oficiales db 2
-    turno db 1 ;0 si es turno del jugador 1(soldado), 1 si es turno del jugador 2(oficial)
+    turno db 0 ;0 si es turno del jugador 1(soldado), 1 si es turno del jugador 2(oficial)
     stats_oficial_1 dw 0,0,0,0,0,0,0,0,0 ;0: izq | 1: der | 2: abajo | 3: arriba | 4: superior der | 5: superior izq | 6: inferior der | 7: inferior izq | 8: capturas 
     stats_oficial_2 dw 0,0,0,0,0,0,0,0,0
     posicion_oficial2 dw "54",0

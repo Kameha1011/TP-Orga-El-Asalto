@@ -171,7 +171,7 @@ section .text
     	mov byte[simbolo_soldado],'X'
     	mov byte[simbolo_oficial],'O'
        	mov byte[orientacion_tablero],1
-    	mov byte[turno],1
+    	mov byte[turno],0
 
     	jmp juego
 
