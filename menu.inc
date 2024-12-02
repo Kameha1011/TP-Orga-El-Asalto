@@ -883,6 +883,18 @@ section .text
 ;----------------------------------------------------------------
     ;imprimimos las estadisticas de los oficiales
     imprimir_estadisticas_oficiales:
+
+        cmp byte[orientacion_tablero],1
+        je imprimir_estadisticas_oficiales_abajo
+        cmp byte[orientacion_tablero],2
+        je imprimir_estadisticas_oficiales_arriba
+        cmp byte[orientacion_tablero],3
+        je imprimir_estadisticas_oficiales_izquierda
+        cmp byte[orientacion_tablero],4
+        je imprimir_estadisticas_oficiales_derecha
+
+
+    imprimir_estadisticas_oficiales_abajo:
         ; Imprimir estadísticas oficial 1
         mov rdi, msg_estadisticas_oficial1
         sub rsp, 8
@@ -954,3 +966,218 @@ section .text
         add rsp, 8
         ret
 
+      imprimir_estadisticas_oficiales_arriba:
+               ; Imprimir estadísticas oficial 1
+        mov rdi, msg_estadisticas_oficial1
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_direcciones ; mensaje
+        mov rsi, [stats_oficial_1 + 2] ;izq
+        mov rdx, [stats_oficial_1] ;der
+        mov rcx, [stats_oficial_1 + 6] ;arriba
+        mov r8, [stats_oficial_1 + 4] ;abajo
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales
+        mov rsi, [stats_oficial_1 + 14] ;arr der
+        mov rdx, [stats_oficial_1 + 12] ;arr izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales_2
+        mov rsi, [stats_oficial_1 + 10] ;inf der
+        mov rdx, [stats_oficial_1 + 8] ;inf izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_capturas
+        mov rsi, [stats_oficial_1 + 16] ;capturas
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        ; Imprimir estadísticas oficial 2
+        mov rdi, msg_estadisticas_oficial2
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_direcciones ; mensaje
+        mov rsi, [stats_oficial_2 + 2] ;izq
+        mov rdx, [stats_oficial_2] ;der
+        mov rcx, [stats_oficial_2 + 6] ;arriba
+        mov r8, [stats_oficial_2 + 4] ;abajo
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales
+        mov rsi, [stats_oficial_2 + 14] ;arr der
+        mov rdx, [stats_oficial_2 + 12] ;arr izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales_2
+        mov rsi, [stats_oficial_2 + 10] ;inf der
+        mov rdx, [stats_oficial_2 + 8] ;inf izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_capturas
+        mov rsi, [stats_oficial_2 + 16] ;capturas
+        sub rsp, 8
+        call printf
+        add rsp, 8
+        ret
+
+    imprimir_estadisticas_oficiales_derecha:
+                ; Imprimir estadísticas oficial 1
+        mov rdi, msg_estadisticas_oficial1
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_direcciones ; mensaje
+        mov rsi, [stats_oficial_1 + 4] ;izq
+        mov rdx, [stats_oficial_1 + 6] ;der
+        mov rcx, [stats_oficial_1] ;arriba
+        mov r8, [stats_oficial_1 + 2] ;abajo
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales
+        mov rsi, [stats_oficial_1 + 12] ;arr der
+        mov rdx, [stats_oficial_1 + 8] ;arr izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales_2
+        mov rsi, [stats_oficial_1 + 14] ;inf der
+        mov rdx, [stats_oficial_1 + 10] ;inf izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_capturas
+        mov rsi, [stats_oficial_1 + 16] ;capturas
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        ; Imprimir estadísticas oficial 2
+        mov rdi, msg_estadisticas_oficial2
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_direcciones
+        mov rsi, [stats_oficial_2]
+        mov rdx, [stats_oficial_2 + 2] ;der
+        mov rcx, [stats_oficial_2 + 4] ;arriba
+        mov r8, [stats_oficial_2 + 6] ;abajo
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales
+        mov rsi, [stats_oficial_2 + 8] ;arr der
+        mov rdx, [stats_oficial_2 + 10] ;der izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales_2
+        mov rsi, [stats_oficial_2 + 12] ;inf der
+        mov rdx, [stats_oficial_2 + 14] ;inf izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_capturas
+        mov rsi, [stats_oficial_2 + 16] ;capturas
+        sub rsp, 8
+        call printf
+        add rsp, 8
+        ret
+
+    imprimir_estadisticas_oficiales_izquierda:
+            ; Imprimir estadísticas oficial 1
+        mov rdi, msg_estadisticas_oficial1
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_direcciones ; mensaje
+        mov rsi, [stats_oficial_1 + 4] ;izq
+        mov rdx, [stats_oficial_1 + 6] ;der
+        mov rcx, [stats_oficial_1] ;arriba
+        mov r8, [stats_oficial_1 + 2] ;abajo
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales
+        mov rsi, [stats_oficial_1 + 10] ;arr der
+        mov rdx, [stats_oficial_1 + 14] ;arr izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales_2
+        mov rsi, [stats_oficial_1 + 8] ;inf der
+        mov rdx, [stats_oficial_1 + 12] ;inf izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_capturas
+        mov rsi, [stats_oficial_1 + 16] ;capturas
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        ; Imprimir estadísticas oficial 2
+        mov rdi, msg_estadisticas_oficial2
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_direcciones
+        mov rsi, [stats_oficial_2 + 4] ;izq
+        mov rdx, [stats_oficial_2 + 6] ;der
+        mov rcx, [stats_oficial_2] ;arriba
+        mov r8, [stats_oficial_2 + 2] ;abajo
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales
+        mov rsi, [stats_oficial_2 + 10] ;arr der
+        mov rdx, [stats_oficial_2 + 14] ;der izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_movimientos_diagonales_2
+        mov rsi, [stats_oficial_2 + 8] ;inf der
+        mov rdx, [stats_oficial_2 + 12] ;inf izq
+        sub rsp, 8
+        call printf
+        add rsp, 8
+
+        mov rdi, txt_capturas
+        mov rsi, [stats_oficial_2 + 16] ;capturas
+        sub rsp, 8
+        call printf
+        add rsp, 8
+        ret
