@@ -878,18 +878,6 @@ section .text
         add rsp,8
         ret
 ;----------------------------------------------------------------
-    ; Subroutine to clear the input buffer
-    clear_input_buffer:
-        mov rax, 0              ; Syscall for read
-        mov rdi, 0              ; File descriptor for standard input (stdin)
-        lea rsi, [buffer_casilla_menu]       ; Buffer to store discarded input
-        mov rdx, 1              ; Read one byte at a time
-    clear_loop:
-        syscall                 ; Read one byte
-        cmp byte [buffer_casilla_menu], 10   ; Check if it's a newline character (ASCII 10)
-        jne clear_loop          ; Repeat until newline is found
-        ret                     ; Return to caller
-;----------------------------------------------------------------
 	salida:
         ret
 ;----------------------------------------------------------------
